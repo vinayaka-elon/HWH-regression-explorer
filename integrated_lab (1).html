@@ -1,0 +1,1752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HWH - Student Outcome Analysis</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Display:wght@400;700&family=Roboto+Mono:wght@400;500&family=Roboto:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#1a73e8;--blue-d:#1557b0;--blue-l:#e8f0fe;
+  --green:#1e8e3e;--green-l:#e6f4ea;
+  --red:#d93025;--red-l:#fce8e6;
+  --yellow:#f9ab00;--yellow-l:#fef7e0;
+  --purple:#8430ce;--purple-l:#f3e8fd;
+  --teal:#007b83;--teal-l:#e4f7fb;
+  --orange:#e37400;--orange-l:#fde8c8;
+  --g900:#202124;--g800:#3c4043;--g700:#5f6368;
+  --g500:#9aa0a6;--g300:#dadce0;--g100:#f1f3f4;--g50:#f8f9fa;
+  --white:#fff;--bg:#eef2fb;
+  --sh1:0 1px 2px rgba(60,64,67,.3),0 1px 3px 1px rgba(60,64,67,.15);
+  --sh2:0 2px 6px 2px rgba(60,64,67,.15),0 1px 2px rgba(60,64,67,.3);
+  --r:12px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--g900);font-family:'Roboto',sans-serif;font-size:14px;line-height:1.5;min-height:100vh;}
+.app-bar{background:var(--white);border-bottom:1px solid var(--g300);min-height:52px;display:flex;align-items:center;padding:8px 20px;position:sticky;top:0;z-index:200;box-shadow:var(--sh1);}
+.app-title{font-family:'Google Sans',sans-serif;font-size:16px;font-weight:500;color:var(--g800);}
+.app-bar-right{margin-left:auto;}
+.prog-chip{background:var(--blue-l);color:var(--blue);font-family:'Google Sans',sans-serif;font-size:12px;font-weight:500;padding:4px 12px;border-radius:20px;}
+.attr-bar{background:#f8f9fa;border-bottom:1px solid #dadce0;padding:5px 20px;font-size:11px;color:#5f6368;position:sticky;top:50px;z-index:190;}
+.stepper-wrap{background:var(--white);border-bottom:1px solid var(--g300);padding:0 20px;overflow-x:auto;position:sticky;top:60px;z-index:180;box-shadow:var(--sh1);}
+.stepper{display:flex;min-width:640px;}
+.step-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 4px;cursor:pointer;border-bottom:3px solid transparent;transition:all .15s;gap:2px;}
+.step-item:hover:not(.locked){background:var(--g50);}
+.step-item.active{border-bottom-color:var(--blue);}
+.step-item.locked{opacity:.35;cursor:not-allowed;pointer-events:none;}
+.step-item.done .sn{background:var(--green)!important;color:white!important;}
+.sn{width:21px;height:21px;border-radius:50%;background:var(--g100);display:flex;align-items:center;justify-content:center;font-family:'Google Sans',sans-serif;font-size:11px;font-weight:700;color:var(--g700);transition:all .2s;}
+.step-item.active .sn{background:var(--blue);color:white;}
+.sl{font-family:'Google Sans',sans-serif;font-size:10px;font-weight:500;color:var(--g700);text-align:center;line-height:1.3;}
+.step-item.active .sl{color:var(--blue);}
+.main{max-width:1120px;margin:0 auto;padding:18px 14px 88px;}
+.phase{display:none;}
+.phase.active{display:block;animation:fi .2s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.hero{border-radius:var(--r);padding:22px 26px;margin-bottom:18px;position:relative;overflow:hidden;}
+.hero.bh{background:linear-gradient(135deg,#1a73e8,#4285f4 60%,#174ea6);}
+.hero.gh{background:linear-gradient(135deg,#0d7a2e,#1e8e3e 60%,#137333);}
+.hero.ph{background:linear-gradient(135deg,#6c27a8,#8430ce 60%,#5c1f9e);}
+.hero.rh{background:linear-gradient(135deg,#b0291e,#d93025 60%,#8c1b13);}
+.hero.th{background:linear-gradient(135deg,#006670,#007b83 60%,#00565c);}
+.hero::after{content:'';position:absolute;right:-30px;bottom:-30px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.05);pointer-events:none;}
+.hero-ey{font-family:'Roboto Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:5px;}
+.hero h2{font-family:'Google Sans Display',sans-serif;font-size:clamp(17px,2.6vw,24px);font-weight:700;color:white;line-height:1.2;margin-bottom:5px;}
+.hero p{font-size:13px;color:rgba(255,255,255,.85);font-weight:300;line-height:1.7;max-width:540px;}
+.card{background:var(--white);border-radius:var(--r);box-shadow:var(--sh1);overflow:hidden;margin-bottom:13px;}
+.ch{padding:13px 17px 9px;border-bottom:1px solid var(--g100);display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.ct{font-family:'Google Sans',sans-serif;font-size:14px;font-weight:700;color:var(--g900);}
+.cs{font-size:11px;color:var(--g700);margin-top:1px;}
+.cb{padding:13px 17px;}
+.co{border-radius:8px;padding:11px 15px;font-size:13px;line-height:1.75;margin-bottom:12px;border-left:4px solid transparent;}
+.co.bl{background:var(--blue-l);border-color:var(--blue);color:#174ea6;}
+.co.gr{background:var(--green-l);border-color:var(--green);color:#0d5724;}
+.co.rd{background:var(--red-l);border-color:var(--red);color:#7a1a14;}
+.co.yl{background:var(--yellow-l);border-color:var(--yellow);color:#7a4f00;}
+.co.pu{background:var(--purple-l);border-color:var(--purple);color:#44007a;}
+.co-t{font-family:'Google Sans',sans-serif;font-weight:700;font-size:12px;margin-bottom:2px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:13px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;}
+@media(max-width:660px){.g2,.g3{grid-template-columns:1fr;}}
+@media(max-width:820px){.g3{grid-template-columns:1fr 1fr;}}
+.stat-row{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:16px;}
+.sc{background:var(--white);border-radius:8px;padding:11px 13px;box-shadow:var(--sh1);flex:1;min-width:105px;}
+.sc .v{font-family:'Google Sans Display',sans-serif;font-size:21px;font-weight:700;color:var(--g900);line-height:1;}
+.sc .l{font-size:10px;color:var(--g500);margin-top:2px;text-transform:uppercase;letter-spacing:.4px;}
+
+/* ══ MODEL BUILDER ══ */
+.workspace{display:grid;grid-template-columns:240px 1fr;gap:14px;align-items:start;}
+@media(max-width:700px){.workspace{grid-template-columns:1fr;}}
+.palette{background:var(--g50);border:1px solid var(--g300);border-radius:9px;padding:12px;}
+.pal-title{font-family:'Google Sans',sans-serif;font-size:11px;font-weight:700;color:var(--g700);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.vcard{background:var(--white);border:1.5px solid var(--g300);border-radius:7px;padding:9px 11px;cursor:grab;margin-bottom:7px;transition:all .14s;user-select:none;position:relative;}
+.vcard:hover{border-color:var(--blue);box-shadow:var(--sh1);}
+.vcard.dragging{opacity:.45;transform:scale(.96);}
+.vcard.inmodel{border-color:var(--blue);background:var(--blue-l);opacity:.45;cursor:not-allowed;}
+.vcard-name{font-family:'Google Sans',sans-serif;font-size:12px;font-weight:700;color:var(--g900);margin-bottom:1px;padding-right:36px;}
+.vcard-desc{font-size:10px;color:var(--g500);line-height:1.35;}
+.vcard-r2{position:absolute;top:8px;right:8px;font-family:'Roboto Mono',monospace;font-size:9px;color:var(--g500);}
+.model-area{display:flex;flex-direction:column;gap:10px;}
+.drop-zone{background:var(--white);border:2px dashed var(--g300);border-radius:9px;padding:12px;min-height:72px;transition:all .18s;}
+.drop-zone.over{border-color:var(--blue);background:var(--blue-l);}
+.dz-title{font-family:'Google Sans',sans-serif;font-size:11px;font-weight:700;color:var(--g700);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;display:flex;align-items:center;gap:5px;}
+.dz-hint{font-size:11px;color:var(--g500);text-align:center;padding:8px 0;font-style:italic;}
+.dropped-chips{display:flex;flex-wrap:wrap;gap:5px;}
+.dchip{background:var(--blue);color:white;border-radius:16px;padding:4px 10px;font-size:11px;font-family:'Google Sans',sans-serif;font-weight:500;display:flex;align-items:center;gap:5px;cursor:pointer;transition:background .12s;}
+.dchip:hover{background:var(--blue-d);}
+.model-stats{background:var(--g50);border:1px solid var(--g300);border-radius:9px;padding:12px;}
+.model-eq{background:var(--g900);border-radius:6px;padding:9px 13px;font-family:'Roboto Mono',monospace;font-size:11px;color:#a8d5a2;margin-bottom:10px;word-break:break-all;}
+.r2-bar-wrap{margin-bottom:10px;}
+.r2-bar-lbl{font-size:11px;color:var(--g700);margin-bottom:3px;font-family:'Google Sans',sans-serif;font-weight:500;}
+.r2-bar-track{background:var(--g300);border-radius:3px;height:11px;overflow:hidden;position:relative;}
+.r2-bar-fill{height:100%;border-radius:3px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+.r2-markers{display:flex;justify-content:space-between;font-size:9px;color:var(--g500);margin-top:1px;font-family:'Roboto Mono',monospace;}
+.mstat-g{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:10px;}
+@media(max-width:480px){.mstat-g{grid-template-columns:repeat(2,1fr);}}
+.msb{background:var(--white);border-radius:6px;padding:9px;text-align:center;box-shadow:var(--sh1);}
+.msb .mv{font-family:'Roboto Mono',monospace;font-size:16px;font-weight:500;color:var(--g900);margin-bottom:1px;}
+.msb .ml{font-size:9px;color:var(--g500);text-transform:uppercase;letter-spacing:.3px;}
+.msb .mn{font-size:9px;color:var(--g500);margin-top:1px;}
+.ot-row{background:var(--g100);border-radius:7px;padding:3px;display:inline-flex;gap:2px;}
+.ot{padding:5px 13px;border-radius:5px;font-family:'Google Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--g700);transition:all .14s;}
+.ot.act{background:var(--white);color:var(--g900);box-shadow:var(--sh1);}
+.comp-tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.comp-tbl th{background:var(--g50);padding:7px 10px;text-align:left;font-family:'Google Sans',sans-serif;font-size:10px;color:var(--g700);font-weight:700;border-bottom:1px solid var(--g300);text-transform:uppercase;letter-spacing:.4px;}
+.comp-tbl td{padding:7px 10px;border-bottom:1px solid var(--g100);color:var(--g800);vertical-align:middle;}
+.comp-tbl tr:hover td{background:var(--g50);}
+.sig-y{background:var(--green-l);color:var(--green);font-family:'Roboto Mono',monospace;font-size:10px;padding:1px 6px;border-radius:9px;}
+.sig-n{background:var(--g100);color:var(--g500);font-family:'Roboto Mono',monospace;font-size:10px;padding:1px 6px;border-radius:9px;}
+.chart-box{background:var(--g50);border:1px solid var(--g300);border-radius:7px;position:relative;overflow:hidden;}
+.pred-box{background:var(--white);border:1px solid var(--g300);border-radius:9px;padding:12px;margin-top:10px;}
+.slider-row{display:flex;align-items:center;gap:9px;margin-bottom:9px;}
+.slider-row label{font-size:11px;color:var(--g700);min-width:130px;font-family:'Roboto Mono',monospace;}
+input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:4px;background:var(--g300);border-radius:2px;outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--blue);cursor:pointer;}
+.slv{font-family:'Roboto Mono',monospace;font-size:12px;color:var(--blue);min-width:40px;text-align:right;font-weight:500;}
+.gauge-row{display:flex;align-items:center;gap:9px;margin-bottom:6px;}
+.gl{font-size:11px;color:var(--g700);min-width:105px;}
+.gt{flex:1;background:var(--g100);border-radius:3px;height:8px;overflow:hidden;}
+.gf{height:100%;border-radius:3px;transition:width .3s;}
+.gp{font-family:'Roboto Mono',monospace;font-size:12px;font-weight:500;color:var(--g900);min-width:42px;text-align:right;}
+.mh-row{background:var(--g50);border:1px solid var(--g300);border-radius:7px;padding:9px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:border-color .13s;margin-bottom:6px;}
+.mh-row:hover{border-color:var(--blue);}
+.bar-row{display:flex;align-items:center;gap:7px;margin-bottom:9px;}
+.bl{font-size:12px;color:var(--g800);font-weight:500;min-width:152px;line-height:1.3;}
+.bl small{display:block;font-size:10px;color:var(--g500);font-weight:400;}
+.bt{flex:1;background:var(--g100);border-radius:3px;height:20px;position:relative;overflow:visible;}
+.bf{height:100%;border-radius:3px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+.bp{font-family:'Roboto Mono',monospace;font-size:10px;color:var(--g700);position:absolute;right:-38px;top:50%;transform:translateY(-50%);}
+.bias-tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.bias-tbl th{background:var(--g50);padding:7px 10px;text-align:left;font-family:'Google Sans',sans-serif;font-size:10px;color:var(--g700);font-weight:700;border-bottom:1px solid var(--g300);text-transform:uppercase;}
+.bias-tbl td{padding:7px 10px;border-bottom:1px solid var(--g100);color:var(--g800);vertical-align:top;}
+.bias-tbl tr:hover td{background:var(--g50);}
+.btag{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-family:'Google Sans',sans-serif;font-weight:600;}
+.bt-h{background:var(--red-l);color:var(--red);}
+.bt-m{background:var(--yellow-l);color:var(--orange);}
+.bt-l{background:var(--green-l);color:var(--green);}
+.bt-p{background:var(--red-l);color:var(--red);}
+.fair-card{background:var(--white);border-radius:var(--r);padding:15px;box-shadow:var(--sh1);border-top:3px solid transparent;}
+.q-card{background:var(--white);border-radius:var(--r);box-shadow:var(--sh1);padding:16px;margin-bottom:13px;}
+.q-num{font-family:'Roboto Mono',monospace;font-size:10px;color:var(--g500);text-transform:uppercase;letter-spacing:.9px;margin-bottom:7px;}
+.q-stem{font-size:14px;font-weight:500;color:var(--g900);line-height:1.55;padding:11px 13px;background:var(--blue-l);border-left:4px solid var(--blue);border-radius:0 7px 7px 0;margin-bottom:12px;}
+.q-stem.eq{background:var(--purple-l);border-color:var(--purple);}
+.opts{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;}
+.opt{background:var(--g50);border:1.5px solid var(--g300);border-radius:7px;padding:10px 13px;cursor:pointer;text-align:left;font-size:13px;color:var(--g700);transition:all .13s;display:flex;gap:9px;align-items:flex-start;}
+.opt:hover:not(:disabled){background:var(--blue-l);border-color:var(--blue);color:#174ea6;}
+.opt.correct{background:var(--green-l);border-color:var(--green);color:#0d5724;}
+.opt.wrong{background:var(--red-l);border-color:var(--red);color:#7a1a14;}
+.opt.reveal{background:var(--green-l);border-color:var(--green);color:#0d5724;}
+.opt-letter{font-family:'Roboto Mono',monospace;font-size:10px;font-weight:700;flex-shrink:0;margin-top:2px;color:var(--g500);}
+.fb{border-radius:7px;padding:11px 14px;font-size:13px;line-height:1.7;display:none;}
+.fb.show{display:block;}
+.fb.good{background:var(--green-l);color:#0d5724;}
+.fb.bad{background:var(--red-l);color:#7a1a14;}
+.fb-t{font-family:'Google Sans',sans-serif;font-weight:700;font-size:13px;margin-bottom:2px;}
+.score-bar{background:var(--white);border-radius:var(--r);padding:11px 16px;display:flex;align-items:center;gap:12px;margin-bottom:14px;box-shadow:var(--sh1);}
+.sbn{font-family:'Google Sans Display',sans-serif;font-size:19px;font-weight:700;color:var(--blue);}
+.pips{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap;}
+.pip{width:20px;height:5px;border-radius:3px;background:var(--g300);transition:background .2s;}
+.pip.ok{background:var(--green);}
+.pip.no{background:var(--red);}
+.nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:9px;}
+.btn-p{background:var(--blue);color:white;font-family:'Google Sans',sans-serif;font-size:13px;font-weight:700;padding:8px 20px;border:none;border-radius:18px;cursor:pointer;transition:background .13s;}
+.btn-p:hover{background:var(--blue-d);}
+.btn-p:disabled{background:var(--g300);cursor:not-allowed;color:var(--g700);}
+.btn-s{background:var(--white);color:var(--blue);font-family:'Google Sans',sans-serif;font-size:13px;font-weight:700;padding:8px 20px;border:1.5px solid var(--blue);border-radius:18px;cursor:pointer;}
+.btn-s:hover{background:var(--blue-l);}
+.bridge{background:linear-gradient(135deg,var(--blue-l),var(--purple-l));border-radius:var(--r);padding:14px 18px;margin:12px 0;border:1px solid #c5b8e8;}
+.bridge-t{font-family:'Google Sans',sans-serif;font-size:13px;font-weight:700;color:var(--purple);margin-bottom:3px;}
+.bridge-b{font-size:13px;color:var(--g800);line-height:1.75;}
+.divider{height:1px;background:var(--g300);margin:14px 0;}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-family:'Google Sans',sans-serif;font-weight:500;}
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1px solid var(--g300);padding:7px 18px;display:flex;align-items:center;gap:12px;z-index:100;box-shadow:0 -2px 6px rgba(60,64,67,.1);}
+/* Data table styles */
+#dataTable th{background:var(--g50);padding:9px 12px;text-align:left;font-family:'Google Sans',sans-serif;font-size:11px;color:var(--g700);font-weight:700;border-bottom:2px solid var(--g300);white-space:nowrap;cursor:pointer;user-select:none;position:sticky;top:0;z-index:10;}
+#dataTable th:hover{background:var(--blue-l);color:var(--blue);}
+#dataTable th.sort-asc::after{content:' ↑';color:var(--blue);}
+#dataTable th.sort-desc::after{content:' ↓';color:var(--blue);}
+#dataTable td{padding:8px 12px;border-bottom:1px solid var(--g100);color:var(--g800);white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis;}
+#dataTable tr:hover td{background:var(--blue-ll,#f0f4ff);}
+#dataTable tr.row-grad td:first-child{border-left:3px solid var(--green);}
+#dataTable tr.row-emp td:first-child{border-left:3px solid var(--blue);}
+#dataTable tr.row-both td:first-child{border-left:3px solid var(--purple);}
+.badge-yes{background:var(--green-l);color:var(--green);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;}
+.badge-no{background:var(--g100);color:var(--g500);padding:2px 8px;border-radius:10px;font-size:10px;}
+.badge-na{color:var(--g300);font-size:11px;}
+.col-group-btn{padding:5px 12px;border-radius:16px;font-family:'Google Sans',sans-serif;font-size:11px;font-weight:500;cursor:pointer;border:1.5px solid var(--g300);background:var(--white);color:var(--g700);transition:all .13s;white-space:nowrap;}
+.col-group-btn.active{background:var(--blue);border-color:var(--blue);color:white;}
+.pg-btn{padding:5px 11px;border-radius:6px;border:1px solid var(--g300);background:var(--white);color:var(--g700);font-family:'Google Sans',sans-serif;font-size:12px;cursor:pointer;}
+.pg-btn:hover{background:var(--g50);}
+.pg-btn.cur{background:var(--blue);border-color:var(--blue);color:white;font-weight:700;}
+/* ── SURVEY STYLES ── */
+.survey-phase{background:var(--bg);min-height:100vh;}
+.survey-hero{background:linear-gradient(135deg,#1a73e8,#174ea6);padding:22px 28px 18px;color:white;}
+.survey-hero h2{font-family:'Google Sans Display',sans-serif;font-size:22px;font-weight:700;margin-bottom:4px;}
+.survey-hero p{font-size:13px;color:rgba(255,255,255,.85);font-weight:300;line-height:1.7;max-width:560px;}
+.survey-section{background:var(--white);border-radius:var(--r);box-shadow:var(--sh1);margin:16px 16px 0;overflow:hidden;}
+.survey-section-head{padding:14px 18px 10px;border-bottom:2px solid var(--g100);display:flex;align-items:center;gap:10px;}
+.survey-section-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Google Sans',sans-serif;font-size:13px;font-weight:700;color:white;flex-shrink:0;}
+.survey-section-title{font-family:'Google Sans',sans-serif;font-size:14px;font-weight:700;color:var(--g900);}
+.survey-section-sub{font-size:11px;color:var(--g500);margin-top:1px;}
+.survey-body{padding:16px 18px;}
+.survey-q{margin-bottom:20px;}
+.survey-q-label{font-size:13px;color:var(--g900);line-height:1.65;margin-bottom:10px;font-weight:500;}
+.survey-q-hint{font-size:11px;color:var(--g500);margin-bottom:8px;font-style:italic;}
+.likert-row{display:flex;gap:0;align-items:stretch;}
+.likert-opt{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;}
+.likert-opt input[type=radio]{display:none;}
+.likert-btn{width:100%;padding:8px 4px;background:var(--g50);border:1.5px solid var(--g300);font-family:'Roboto Mono',monospace;font-size:13px;font-weight:600;color:var(--g700);cursor:pointer;transition:all .13s;text-align:center;border-radius:0;}
+.likert-opt:first-child .likert-btn{border-radius:7px 0 0 7px;}
+.likert-opt:last-child .likert-btn{border-radius:0 7px 7px 0;}
+.likert-btn:hover{background:var(--blue-l);border-color:var(--blue);color:var(--blue);}
+.likert-opt input:checked + .likert-btn{background:var(--blue);border-color:var(--blue);color:white;}
+.likert-lbl{font-size:9px;color:var(--g500);text-align:center;line-height:1.3;padding:0 2px;max-width:60px;}
+.likert-anchors{display:flex;justify-content:space-between;font-size:10px;color:var(--g500);margin-top:4px;padding:0 2px;}
+.vignette-box{background:var(--g50);border-left:4px solid var(--blue);border-radius:0 8px 8px 0;padding:13px 16px;margin-bottom:12px;font-size:13px;color:var(--g800);line-height:1.75;}
+.vignette-box strong{color:var(--g900);}
+.radio-opts{display:flex;flex-direction:column;gap:7px;}
+.radio-opt{display:flex;align-items:flex-start;gap:9px;padding:9px 12px;border:1.5px solid var(--g300);border-radius:7px;cursor:pointer;transition:all .13s;font-size:13px;color:var(--g700);}
+.radio-opt:hover{border-color:var(--blue);background:var(--blue-l);color:#174ea6;}
+.radio-opt input[type=radio]{margin-top:2px;flex-shrink:0;accent-color:var(--blue);}
+.radio-opt.selected{border-color:var(--blue);background:var(--blue-l);color:#174ea6;}
+.survey-textarea{width:100%;border:1.5px solid var(--g300);border-radius:7px;padding:10px 12px;font-family:'Roboto',sans-serif;font-size:13px;color:var(--g900);line-height:1.6;resize:vertical;min-height:72px;outline:none;transition:border-color .13s;}
+.survey-textarea:focus{border-color:var(--blue);}
+.survey-textarea::placeholder{color:var(--g500);}
+.role-badge{display:inline-flex;align-items:center;gap:5px;border-radius:16px;padding:4px 12px;font-size:11px;font-family:'Google Sans',sans-serif;font-weight:600;margin-bottom:10px;}
+.role-analyst{background:var(--blue-l);color:var(--blue);}
+.role-director{background:var(--purple-l);color:var(--purple);}
+.survey-progress{background:var(--g100);border-radius:3px;height:6px;margin:0 16px 16px;overflow:hidden;}
+.survey-progress-fill{height:100%;background:var(--blue);border-radius:3px;transition:width .4s cubic-bezier(.4,0,.2,1);}
+.retro-banner{background:linear-gradient(135deg,var(--purple-l),var(--blue-l));border:1px solid #c5b8e8;border-radius:var(--r);padding:14px 18px;margin:16px 16px 0;}
+.retro-banner-t{font-family:'Google Sans',sans-serif;font-size:13px;font-weight:700;color:var(--purple);margin-bottom:4px;}
+.retro-banner-b{font-size:13px;color:var(--g800);line-height:1.7;}
+.survey-submit-btn{background:var(--blue);color:white;font-family:'Google Sans',sans-serif;font-size:14px;font-weight:700;padding:12px 32px;border:none;border-radius:24px;cursor:pointer;transition:background .13s;display:block;margin:20px auto;}
+.survey-submit-btn:hover{background:var(--blue-d);}
+.survey-complete{text-align:center;padding:40px 20px;}
+.survey-complete-icon{font-size:48px;margin-bottom:12px;}
+.survey-complete-title{font-family:'Google Sans Display',sans-serif;font-size:24px;font-weight:700;color:var(--g900);margin-bottom:8px;}
+.survey-complete-sub{font-size:14px;color:var(--g700);line-height:1.7;max-width:440px;margin:0 auto 20px;}
+.now-section{border-left:3px solid var(--blue);}
+.before-section{border-left:3px solid var(--purple);}
+.section-divider{background:linear-gradient(135deg,var(--purple-l),var(--blue-l));border-radius:var(--r);padding:14px 18px;margin:20px 16px 0;border:1px solid #c5b8e8;}
+</style>
+</head>
+<body>
+
+<div class="app-bar">
+  <div>
+    <div class="app-title">HWH — Student Outcome Analysis</div>
+    <div style="font-size:11px;color:var(--g500);margin-top:1px;font-family:'Roboto',sans-serif;">by Vinayaka Gude, PhD &nbsp;·&nbsp; Elon University</div>
+  </div>
+  <div class="app-bar-right">
+    <div class="prog-chip" id="progressChip">Phase 1 of 2</div>
+  </div>
+</div>
+<div class="stepper-wrap">
+  <div class="stepper">
+    <div class="step-item active" id="si0" onclick="goPhase(0)"><div class="sn">1</div><div class="sl">Context &<br>Problem</div></div>
+    <div class="step-item locked" id="si1" onclick="goPhase(1)"><div class="sn">2</div><div class="sl">Build Your<br>Model</div></div>
+    <div class="step-item" id="si2" onclick="goPhase(2)"><div class="sn">📋</div><div class="sl">Data<br>Explorer</div></div>
+    <div class="step-item" id="si3" onclick="goPhase(3)"><div class="sn">📝</div><div class="sl">Decision<br>Survey</div></div>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ══ PHASE 0 ══ -->
+<div class="phase active" id="phase0">
+  <div class="hero bh">
+    <div class="hero-ey">Phase 1 · Situation Brief</div>
+    <h2>You Are the Program Analyst</h2>
+    <p>A Denver-area culinary workforce program serves people experiencing housing instability. Leadership wants to understand what drives participant success. Build regression models, interpret the results, and think critically about what the data can — and cannot — tell you.</p>
+  </div>
+  <div class="stat-row">
+    <div class="sc"><div class="v">671</div><div class="l">Total Enrolled</div></div>
+    <div class="sc"><div class="v">14.8%</div><div class="l">Graduation Rate</div></div>
+    <div class="sc"><div class="v">13.0%</div><div class="l">Employment Rate</div></div>
+    <div class="sc"><div class="v">200</div><div class="l">Variables Tracked</div></div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="ch"><div class="ct">📋 Who Are the Participants?</div></div>
+      <div class="cb" style="font-size:13px;color:var(--g700);line-height:1.85;">
+        All participants experience housing instability in the Denver area. The program provides culinary job training, housing support, and job placement.
+        <div class="divider"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;font-size:12px;">
+          <div><strong style="color:var(--g900);">~38%</strong> Black/African American</div>
+          <div><strong style="color:var(--g900);">~28%</strong> White</div>
+          <div><strong style="color:var(--g900);">~11%</strong> Hispanic/Latino</div>
+          <div><strong style="color:var(--g900);">~55%</strong> Women</div>
+          <div><strong style="color:var(--g900);">~49%</strong> Have criminal history</div>
+          <div><strong style="color:var(--g900);">~77%</strong> Receive SNAP benefits</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct">🎯 Your Goals</div></div>
+      <div class="cb" style="font-size:13px;line-height:1.85;">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;gap:8px;align-items:flex-start;"><span style="background:var(--blue);color:white;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px;">1</span><span style="color:var(--g700);">Drag and combine variables to build regression models predicting graduation and employment</span></div>
+          <div style="display:flex;gap:8px;align-items:flex-start;"><span style="background:var(--blue);color:white;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px;">2</span><span style="color:var(--g700);">Explore whether demographic groups show different outcome patterns</span></div>
+          <div style="display:flex;gap:8px;align-items:flex-start;"><span style="background:var(--blue);color:white;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px;">3</span><span style="color:var(--g700);">Evaluate bias risks if your findings were used for admissions decisions</span></div>
+          <div style="display:flex;gap:8px;align-items:flex-start;"><span style="background:var(--purple);color:white;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px;">4</span><span style="color:var(--g700);">Reflect critically on what regression can and cannot tell us about real-world programs</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="co bl">
+    <div class="co-t">What is a Linear Regression?</div>
+    We model: <strong>Outcome = β₀ + β₁·X₁ + β₂·X₂ + …</strong> &nbsp;The slope β tells us how much the outcome changes per unit increase in each predictor. R² measures what proportion of variation in the outcome the model explains. In Phase 2 you will <em>build your own model</em> by dragging variables in — and observe what happens to R² as you add or remove them.
+  </div>
+
+  <!-- WU Q1 — correct = D -->
+  <div class="q-card">
+    <div class="q-num">Warm-Up · Question 1 of 2</div>
+    <div class="q-stem">Before exploring any data: which single variable do you predict will most strongly predict whether a participant graduates from the program?</div>
+    <div class="opts" id="wu1opts">
+      <button class="opt" onclick="answerWU(0,0,false,'Mental health score at intake IS statistically significant, but explains only about 2.8% of graduation variance — a much smaller effect than most people expect.')"><span class="opt-letter">A</span>Mental health score measured at program intake</button>
+      <button class="opt" onclick="answerWU(0,1,false,'Housing stability score at intake shows no significant relationship with graduation — one of the most counterintuitive findings in this dataset.')"><span class="opt-letter">B</span>Housing stability score measured at program intake</button>
+      <button class="opt" onclick="answerWU(0,2,false,'Employment readiness at intake is significant, but explains only about 2.8% of graduation variance — comparable to mental health, and far smaller than the strongest predictor.')"><span class="opt-letter">C</span>Employment readiness score measured at program intake</button>
+      <button class="opt" onclick="answerWU(0,3,true,'Correct. Attendance Days has R²=0.763 — by far the strongest predictor. But immediately ask: does attending more cause graduation, or do stable circumstances enable both?')"><span class="opt-letter">D</span>Total days the participant attended the program</button>
+    </div>
+    <div class="fb" id="wu1fb"></div>
+  </div>
+
+  <!-- WU Q2 — correct = A -->
+  <div class="q-card" id="wu2card" style="display:none;">
+    <div class="q-num">Warm-Up · Question 2 of 2</div>
+    <div class="q-stem">The program serves a population that is 38% Black/African American. If leadership wanted to build a "success prediction algorithm" for admissions, what would be the most critical concern?</div>
+    <div class="opts" id="wu2opts">
+      <button class="opt" onclick="answerWU(1,0,true,'Exactly right. Variables like criminal history, prior employment gaps, and educational attainment all correlate with race due to structural inequities — creating illegal disparate impact without ever mentioning race.')"><span class="opt-letter">A</span>That predictors might proxy for race and produce disparate impact</button>
+      <button class="opt" onclick="answerWU(1,1,false,'Data volume matters for model stability, but does not fix the equity concern. A biased algorithm trained on more data simply produces more biased predictions at larger scale.')"><span class="opt-letter">B</span>That the dataset may not be large enough to train a reliable predictive model</button>
+      <button class="opt" onclick="answerWU(1,2,false,'Transparency matters, but explaining a discriminatory algorithm to applicants does not make its outcomes equitable. The priority concern is whether the model causes disparate harm at all.')"><span class="opt-letter">C</span>That participants may not understand how the algorithm reaches decisions about them</button>
+      <button class="opt" onclick="answerWU(1,3,false,'Accuracy and fairness are separate goals that frequently conflict. A statistically accurate model can still systematically disadvantage marginalized groups.')"><span class="opt-letter">D</span>That the algorithm might not be accurate enough to produce reliable outcome predictions</button>
+    </div>
+    <div class="fb" id="wu2fb"></div>
+  </div>
+
+  <div class="nav-row">
+    <div></div>
+    <button class="btn-p" id="p0next" onclick="goPhase(1)" disabled>Build Your Model →</button>
+  </div>
+</div>
+
+<!-- ══ PHASE 1 ══ -->
+<div class="phase" id="phase1">
+  <div class="hero gh">
+    <div class="hero-ey">Phase 2 · Model Builder</div>
+    <h2>Drag Variables to Build Your Model</h2>
+    <p>Drag predictor cards from the left palette into the drop zone. Add multiple variables and watch R² change. Save models and compare them. Try to find the most meaningful model — not just the highest R².</p>
+  </div>
+
+  <div class="card">
+    <div class="ch">
+      <div><div class="ct">Interactive Regression Builder</div><div class="cs">Drag variables · observe R² · save and compare models</div></div>
+      <div class="ot-row">
+        <button class="ot act" id="otG" onclick="setOut('grad')">🎓 Graduation</button>
+        <button class="ot" id="otE" onclick="setOut('emp')">💼 Employment</button>
+      </div>
+    </div>
+    <div class="cb">
+      <div class="workspace">
+        <div class="palette">
+          <div class="pal-title">📦 Variable Palette</div>
+          <div style="font-size:10px;color:var(--g500);margin-bottom:8px;">Drag a card into the model zone →</div>
+          <div id="varPalette"></div>
+        </div>
+        <div class="model-area">
+          <div class="drop-zone" id="dropZone" ondragover="dOver(event)" ondragleave="dLeave(event)" ondrop="dDrop(event)">
+            <div class="dz-title">
+              <span style="color:var(--blue);">📐</span> Your Model
+              <span id="varCount" style="background:var(--blue);color:white;border-radius:9px;padding:0 6px;font-size:10px;margin-left:3px;">0</span>
+              <span style="margin-left:auto;font-size:10px;color:var(--g500);font-weight:400;">Click a chip to remove</span>
+            </div>
+            <div id="droppedChips" class="dropped-chips">
+              <div class="dz-hint" id="dzHint">Drop variables here to add them to your model</div>
+            </div>
+          </div>
+          <div class="model-stats">
+            <div class="model-eq" id="modelEq">Y = β₀ &nbsp;(add variables to build the equation)</div>
+            <div class="r2-bar-wrap">
+              <div class="r2-bar-lbl">R² — proportion of outcome variance explained by your model</div>
+              <div class="r2-bar-track"><div class="r2-bar-fill" id="r2Fill" style="width:0%;background:var(--g300);"></div></div>
+              <div class="r2-markers"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
+            </div>
+            <div class="mstat-g">
+              <div class="msb"><div class="mv" id="mR2">—</div><div class="ml">R²</div><div class="mn" id="mR2s"></div></div>
+              <div class="msb"><div class="mv" id="mAdR2">—</div><div class="ml">Adj. R²</div><div class="mn">penalizes extras</div></div>
+              <div class="msb"><div class="mv" id="mN">—</div><div class="ml">Sample n</div><div class="mn"></div></div>
+              <div class="msb"><div class="mv" id="mVars">0</div><div class="ml">Predictors</div><div class="mn">in model</div></div>
+            </div>
+            <div id="coefSection" style="display:none;">
+              <div style="font-family:'Google Sans',sans-serif;font-size:11px;font-weight:700;color:var(--g700);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;">Coefficients</div>
+              <table class="comp-tbl"><thead><tr><th>Variable</th><th>Coefficient β</th><th>Direction</th><th>Significance</th></tr></thead><tbody id="coefBody"></tbody></table>
+            </div>
+            <div class="co yl" id="modelInterp" style="display:none;margin-top:10px;margin-bottom:0;"></div>
+          </div>
+          <div class="pred-box" id="predBox" style="display:none;">
+            <div style="font-family:'Google Sans',sans-serif;font-size:11px;font-weight:700;color:var(--g700);margin-bottom:8px;">🎯 Prediction — adjust the slider to see what your model predicts</div>
+            <div id="predSliders"></div>
+            <div style="background:var(--g50);border-radius:6px;padding:10px;margin-top:7px;">
+              <div class="gauge-row"><span class="gl" style="color:var(--blue);">P(Graduate)</span><div class="gt"><div class="gf" id="gfG" style="background:var(--blue);width:0%"></div></div><span class="gp" id="gpG">—</span></div>
+              <div class="gauge-row"><span class="gl" style="color:var(--green);">P(Employed)</span><div class="gt"><div class="gf" id="gfE" style="background:var(--green);width:0%"></div></div><span class="gp" id="gpE">—</span></div>
+              <div style="font-size:10px;color:var(--g500);margin-top:5px;font-style:italic;" id="predNote"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <div style="font-family:'Google Sans',sans-serif;font-size:11px;font-weight:700;color:var(--g700);text-transform:uppercase;letter-spacing:.4px;">Saved Models</div>
+              <button onclick="saveModel()" style="background:var(--green);color:white;border:none;border-radius:13px;padding:4px 11px;font-family:'Google Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">💾 Save</button>
+            </div>
+            <div id="modelHist"></div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:12px;">
+        <div style="font-family:'Google Sans',sans-serif;font-size:11px;font-weight:700;color:var(--g700);margin-bottom:6px;">Scatter Plot <span style="font-weight:400;color:var(--g500);">(visible when exactly one variable is in your model)</span></div>
+        <div class="chart-box" id="chartBox" style="height:270px;">
+          <div id="chartPH" style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--g500);font-size:12px;font-family:'Roboto Mono',monospace;text-align:center;padding:18px;">Add a single variable to see the scatter plot with regression line</div>
+          <canvas id="regCanvas" style="display:none;position:absolute;top:0;left:0;"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="regQuizContainer"></div>
+  <div class="nav-row">
+    <button class="btn-s" onclick="goPhase(0)">← Back</button>
+    <div></div>
+  </div>
+</div>
+
+</div><!-- end main -->
+
+<!-- ══ DATA EXPLORER (full-width, outside main) ══ -->
+<div class="phase" id="phase2" style="padding-bottom:80px;">
+  <div style="background:linear-gradient(135deg,#006670,#007b83 60%,#00565c);padding:20px 28px 16px;margin-bottom:0;">
+    <div style="max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="font-family:'Roboto Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:4px;">Phase 3 · Data Explorer</div>
+        <div style="font-family:'Google Sans Display',sans-serif;font-size:22px;font-weight:700;color:white;">Full Dataset — 671 Participants</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.8);margin-top:3px;">Browse, search, sort, and filter the real data. Every row is a participant.</div>
+      </div>
+      <button onclick="goPhase(0)" style="background:rgba(255,255,255,.15);color:white;border:1px solid rgba(255,255,255,.3);border-radius:18px;padding:7px 18px;font-family:'Google Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;">← Back to Lab</button>
+    </div>
+  </div>
+
+  <!-- Controls bar -->
+  <div style="background:var(--white);border-bottom:1px solid var(--g300);padding:12px 20px;position:sticky;top:130px;z-index:50;box-shadow:var(--sh1);">
+    <div style="max-width:1400px;margin:0 auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <!-- Search -->
+      <div style="position:relative;flex:1;min-width:200px;max-width:320px;">
+        <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--g500);font-size:14px;">🔍</span>
+        <input type="text" id="tableSearch" placeholder="Search any field…" oninput="filterTable()"
+          style="width:100%;padding:8px 10px 8px 32px;border:1.5px solid var(--g300);border-radius:7px;font-family:'Roboto',sans-serif;font-size:13px;outline:none;color:var(--g900);"
+          onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--g300)'">
+      </div>
+      <!-- Column group filter -->
+      <div style="display:flex;gap:5px;flex-wrap:wrap;" id="colGroupBtns"></div>
+      <!-- Outcome filter -->
+      <div style="display:flex;align-items:center;gap:7px;margin-left:auto;font-size:12px;color:var(--g700);">
+        <span>Filter:</span>
+        <select id="outcomeFilter" onchange="filterTable()" style="padding:6px 10px;border:1.5px solid var(--g300);border-radius:6px;font-family:'Roboto',sans-serif;font-size:12px;color:var(--g700);outline:none;cursor:pointer;">
+          <option value="all">All participants</option>
+          <option value="graduated">Graduated ✓</option>
+          <option value="not_graduated">Did not graduate</option>
+          <option value="employed">Employed ✓</option>
+          <option value="not_employed">Not employed</option>
+        </select>
+        <span style="color:var(--g500);" id="rowCount"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div style="max-width:1400px;margin:0 auto;padding:16px 16px 0;">
+    <div style="background:var(--white);border-radius:var(--r);box-shadow:var(--sh1);overflow:hidden;">
+      <div style="overflow-x:auto;overflow-y:auto;max-height:calc(100vh - 280px);">
+        <table id="dataTable" style="width:100%;border-collapse:collapse;font-size:12px;min-width:900px;">
+          <thead id="tableHead"></thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <!-- Pagination -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;flex-wrap:wrap;gap:8px;">
+      <div style="font-size:12px;color:var(--g700);" id="pageInfo"></div>
+      <div style="display:flex;gap:6px;" id="pageBtns"></div>
+    </div>
+    <!-- Data note -->
+    <div style="background:var(--yellow-l);border:1px solid var(--yellow);border-radius:8px;padding:12px 16px;font-size:12px;color:#7a4f00;margin-bottom:20px;">
+      <strong>📌 Note for students:</strong> Some columns have missing data (shown as —). This is real-world data — notice which variables have more complete coverage than others, and consider what that means for the analyses you can run. Dates appear as Excel serial numbers in the raw data; they have been converted here for readability.
+    </div>
+  </div>
+</div>
+
+<!-- ══ PHASE 3 — DECISION SURVEY ══ -->
+<div class="phase survey-phase" id="phase3">
+
+  <!-- CONSENT GATE — shown first, hidden after agreement -->
+  <div id="consentGate" style="max-width:600px;margin:40px auto;padding:0 16px 80px;">
+    <div style="background:var(--white);border-radius:var(--r);box-shadow:var(--sh2);overflow:hidden;">
+      <div style="background:linear-gradient(135deg,#1a73e8,#174ea6);padding:22px 24px 18px;">
+        <div style="font-family:'Roboto Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:5px;">Before you begin</div>
+        <div style="font-family:'Google Sans Display',sans-serif;font-size:20px;font-weight:700;color:white;">Research Participation Consent</div>
+      </div>
+      <div style="padding:22px 24px;font-size:13px;color:var(--g800);line-height:1.85;">
+        <p style="margin-bottom:12px;">This short survey is part of a research study on how data analysis labs develop analytical and ethical reasoning skills in business analytics students. Your participation is <strong>completely voluntary</strong>.</p>
+        <div style="background:var(--g50);border-radius:8px;padding:14px 16px;margin-bottom:16px;">
+          <div style="font-family:'Google Sans',sans-serif;font-size:12px;font-weight:700;color:var(--g900);margin-bottom:8px;">What to expect</div>
+          <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--g700);">
+            <div style="display:flex;gap:8px;"><span style="color:var(--blue);flex-shrink:0;">●</span>About 10 minutes to complete</div>
+            <div style="display:flex;gap:8px;"><span style="color:var(--blue);flex-shrink:0;">●</span>Questions about how you think about using data for decisions</div>
+            <div style="display:flex;gap:8px;"><span style="color:var(--blue);flex-shrink:0;">●</span>There are no right or wrong answers — this is not graded</div>
+            <div style="display:flex;gap:8px;"><span style="color:var(--blue);flex-shrink:0;">●</span>Responses are anonymous and stored separately from course records</div>
+          </div>
+        </div>
+        <div style="background:var(--yellow-l);border:1px solid var(--yellow);border-radius:8px;padding:12px 14px;margin-bottom:20px;font-size:12px;color:#7a4f00;">
+          <strong>Privacy:</strong> Your individual responses will not be visible to the instructor. Only aggregate, de-identified results will be used in any research publication.
+        </div>
+        <p style="font-size:12px;color:var(--g700);margin-bottom:20px;">By selecting "I agree," you are consenting to participate. You may stop at any time without penalty. If you do not wish to participate, select "I decline" — you will be returned to the lab with no record of this choice.</p>
+        <div style="display:flex;gap:10px;justify-content:center;">
+          <button onclick="consentDecline()" style="padding:10px 24px;border:1.5px solid var(--g300);border-radius:20px;background:var(--white);color:var(--g700);font-family:'Google Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;">I decline</button>
+          <button onclick="consentAgree()" style="padding:10px 28px;border:none;border-radius:20px;background:var(--blue);color:white;font-family:'Google Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">I agree →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SURVEY — hidden until consent -->
+  <div id="surveyWrapper" style="display:none;">
+    <div class="survey-hero">
+      <div style="font-family:'Roboto Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:5px;">Decision Survey</div>
+      <h2>How Would You Use This Data?</h2>
+      <p>You've built regression models and explored the dataset. Now step into the decision-maker's seat. There are no right or wrong answers — this captures how you think about using data for real program decisions.</p>
+    </div>
+
+    <div class="survey-progress" style="margin-top:14px;"><div class="survey-progress-fill" id="surveyProgress" style="width:0%"></div></div>
+
+  <div id="surveyForm">
+
+    <!-- Part A header -->
+    <div style="margin:16px 16px 0;padding:12px 16px;background:var(--blue-l);border-radius:8px;border-left:3px solid var(--blue);">
+      <div style="font-family:'Google Sans',sans-serif;font-size:13px;font-weight:700;color:var(--blue);">How you think now</div>
+      <div style="font-size:12px;color:var(--g700);margin-top:2px;">Answer based on your thinking after completing the lab today. Scale: 1 = Strongly disagree · 5 = Strongly agree</div>
+    </div>
+
+    <!-- NOW questions — 4 items, one card -->
+    <div class="survey-section now-section" style="margin-top:10px;">
+      <div class="survey-body">
+
+        <div class="survey-q">
+          <div class="survey-q-label">A high R² value is sufficient justification to recommend a variable for a selection algorithm.</div>
+          <div id="likert_sr1_now"></div>
+        </div>
+
+        <div class="survey-q">
+          <div class="survey-q-label">The strength of a predictor's statistical relationship with outcomes and whether that predictor should be used for decisions are two separate questions.</div>
+          <div id="likert_sr2_now"></div>
+        </div>
+
+        <div class="survey-q">
+          <div class="survey-q-label">If a variable predicts program success, it is reasonable to use it as an applicant selection criterion.</div>
+          <div id="likert_vc1_now"></div>
+        </div>
+
+        <div class="survey-q">
+          <div class="survey-q-label">Demographic data is most useful for monitoring how a program serves its population over time — not for screening individual applicants.</div>
+          <div id="likert_dd1_now"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Decision scenarios -->
+    <div class="survey-section now-section" style="margin-top:10px;">
+      <div class="survey-body">
+
+        <!-- Scenario A -->
+        <div class="survey-q">
+          <div class="vignette-box">
+            <strong>Scenario A.</strong> You present your regression results to the program director. Attendance Days predicts graduation with R² = 0.763. The director says: <em>"Great — let's prioritize applicants who have strong attendance history in other programs."</em>
+          </div>
+          <div class="survey-q-label">How do you respond?</div>
+          <div class="radio-opts" id="va1_opts">
+            <label class="radio-opt"><input type="radio" name="va1" value="A"> Agree — it's a strong, validated predictor worth using for selection</label>
+            <label class="radio-opt"><input type="radio" name="va1" value="B"> Agree with caution — use it, but revisit as more data comes in</label>
+            <label class="radio-opt"><input type="radio" name="va1" value="C"> Disagree — attendance and graduation move together, but attendance likely reflects circumstances rather than potential, so using it for selection would penalize people for structural barriers</label>
+            <label class="radio-opt"><input type="radio" name="va1" value="D"> Redirect — ask what problem the director is actually trying to solve before recommending any selection criterion</label>
+          </div>
+        </div>
+
+        <!-- Scenario B -->
+        <div class="survey-q" style="margin-top:20px;">
+          <div class="vignette-box">
+            <strong>Scenario B.</strong> Education level does not significantly predict graduation (p = 0.96). A board member argues: <em>"Then education shouldn't factor into our outreach strategy at all — let's focus recruitment elsewhere."</em>
+          </div>
+          <div class="survey-q-label">What is the most important point to make in response?</div>
+          <div class="radio-opts" id="vb1_opts">
+            <label class="radio-opt"><input type="radio" name="vb1" value="A"> Agree — if education doesn't predict outcomes, it has no role in program strategy</label>
+            <label class="radio-opt"><input type="radio" name="vb1" value="B"> Non-significance here is a positive finding — it suggests the program works across education levels, which is a program strength worth communicating</label>
+            <label class="radio-opt"><input type="radio" name="vb1" value="C"> Need more data before drawing any conclusions from this result</label>
+            <label class="radio-opt"><input type="radio" name="vb1" value="D"> This result only applies to enrolled participants — different data would be needed to guide outreach decisions</label>
+          </div>
+        </div>
+
+        <!-- Scenario C — open ended only -->
+        <div class="survey-q" style="margin-top:20px;">
+          <div class="vignette-box">
+            <strong>Scenario C.</strong> A funder asks: <em>"Based on your analysis, what applicant profile gives the best probability of program success? We want to invest in people who will complete."</em>
+          </div>
+          <div class="survey-q-label">What is the key point you would lead with in your response to the funder?</div>
+          <textarea class="survey-textarea" id="vc1v_open" placeholder="Write 1–2 sentences..."></textarea>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Part B divider -->
+    <div class="section-divider">
+      <div style="font-family:'Google Sans',sans-serif;font-size:13px;font-weight:700;color:var(--purple);margin-bottom:4px;">How you thought before the lab</div>
+      <div style="font-size:13px;color:var(--g800);line-height:1.7;">Think back to <strong>before you started today's lab</strong> — before seeing the data, building any models, or working through the questions. Rate each item as your past self would have. Answer quickly and instinctively.</div>
+    </div>
+
+    <!-- BEFORE questions — same 4 items -->
+    <div class="survey-section before-section" style="margin-top:10px;">
+      <div class="survey-body">
+
+        <div class="survey-q">
+          <div class="survey-q-label">A high R² value is sufficient justification to recommend a variable for a selection algorithm.</div>
+          <div id="likert_sr1_before"></div>
+        </div>
+
+        <div class="survey-q">
+          <div class="survey-q-label">The strength of a predictor's statistical relationship with outcomes and whether that predictor should be used for decisions are two separate questions.</div>
+          <div id="likert_sr2_before"></div>
+        </div>
+
+        <div class="survey-q">
+          <div class="survey-q-label">If a variable predicts program success, it is reasonable to use it as an applicant selection criterion.</div>
+          <div id="likert_vc1_before"></div>
+        </div>
+
+        <div class="survey-q">
+          <div class="survey-q-label">Demographic data is most useful for monitoring how a program serves its population over time — not for screening individual applicants.</div>
+          <div id="likert_dd1_before"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Attribution + demographics -->
+    <div class="survey-section" style="margin-top:10px;">
+      <div class="survey-body">
+
+        <div class="survey-q">
+          <div class="survey-q-label">To what extent did the lab activity itself shift how you think about these decisions?</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:6px;">
+            <span style="font-size:11px;color:var(--g500);min-width:55px;">Not at all</span>
+            <input type="range" id="att1_range" min="1" max="7" value="4" oninput="document.getElementById('att1_val').textContent=this.value;updateSurveyProgress()" style="flex:1;">
+            <span style="font-size:11px;color:var(--g500);min-width:55px;text-align:right;">Entirely</span>
+            <span style="font-family:'Roboto Mono',monospace;font-size:14px;font-weight:600;color:var(--blue);min-width:20px;text-align:center;" id="att1_val">4</span>
+          </div>
+        </div>
+
+        <div class="survey-q">
+          <div class="survey-q-label">What is the single most important thing the lab changed in how you think about data and decisions? <span style="color:var(--g500);font-weight:400;">(optional)</span></div>
+          <textarea class="survey-textarea" id="att3_open" placeholder="1–2 sentences..."></textarea>
+        </div>
+
+        <div class="divider"></div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div>
+            <div style="font-size:12px;color:var(--g700);margin-bottom:4px;">Academic year</div>
+            <select id="d_year" onchange="updateSurveyProgress()" style="width:100%;padding:7px 10px;border:1.5px solid var(--g300);border-radius:6px;font-family:'Roboto',sans-serif;font-size:12px;color:var(--g700);outline:none;background:var(--white);">
+              <option value="">Select…</option>
+              <option>First year</option><option>Sophomore</option><option>Junior</option><option>Senior</option><option>Graduate</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:12px;color:var(--g700);margin-bottom:4px;">Stats/quant courses completed</div>
+            <select id="d_stats" onchange="updateSurveyProgress()" style="width:100%;padding:7px 10px;border:1.5px solid var(--g300);border-radius:6px;font-family:'Roboto',sans-serif;font-size:12px;color:var(--g700);outline:none;background:var(--white);">
+              <option value="">Select…</option>
+              <option>0</option><option>1</option><option>2</option><option>3</option><option>4 or more</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:12px;color:var(--g700);margin-bottom:4px;">Prior data ethics coursework</div>
+            <select id="d_ethics" onchange="updateSurveyProgress()" style="width:100%;padding:7px 10px;border:1.5px solid var(--g300);border-radius:6px;font-family:'Roboto',sans-serif;font-size:12px;color:var(--g700);outline:none;background:var(--white);">
+              <option value="">Select…</option>
+              <option>None</option><option>A few topics in a broader course</option><option>A dedicated course</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:12px;color:var(--g700);margin-bottom:4px;">Self-rated analysis proficiency</div>
+            <select id="d_prof" onchange="updateSurveyProgress()" style="width:100%;padding:7px 10px;border:1.5px solid var(--g300);border-radius:6px;font-family:'Roboto',sans-serif;font-size:12px;color:var(--g700);outline:none;background:var(--white);">
+              <option value="">Select…</option>
+              <option>Beginner</option><option>Intermediate</option><option>Advanced</option>
+            </select>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div style="padding:16px;text-align:center;">
+      <div style="font-size:12px;color:var(--g500);margin-bottom:12px;">Your responses are anonymous and separate from your course grade. The instructor will not see individual responses until after grades are submitted.</div>
+      <button class="survey-submit-btn" onclick="submitSurvey()">Submit →</button>
+    </div>
+
+  </div><!-- end surveyForm -->
+
+  <!-- Completion screen -->
+  <div id="surveyComplete" style="display:none;padding:40px 16px 80px;text-align:center;">
+    <div style="font-size:48px;margin-bottom:16px;">✅</div>
+    <div style="font-family:'Google Sans Display',sans-serif;font-size:22px;font-weight:700;color:var(--g900);margin-bottom:10px;">Thank you</div>
+    <div style="font-size:14px;color:var(--g700);line-height:1.8;max-width:440px;margin:0 auto 28px;">Your responses have been recorded. They will only be reviewed in aggregate, after grades are submitted — no individual response is ever linked to your name or grade.</div>
+    <button class="btn-s" onclick="goPhase(0)">← Return to lab</button>
+  </div>
+
+  </div><!-- end surveyWrapper -->
+
+</div><!-- end phase3 -->
+
+<div class="bottom-bar" id="bottomBar">
+  <div style="font-family:'Google Sans',sans-serif;font-size:12px;color:var(--g700);">Quiz progress:</div>
+  <div class="pips" id="bPips" style="margin-left:4px;"></div>
+</div>
+
+<script>
+// ═══ DATA ═══
+const VARS={
+  attendance:{label:'Attendance Days',desc:'Total days attended',unit:'days',range:[1,111],
+    grad:{slope:0.016,intercept:-0.107,r2:0.763,p:0.0,n:356},emp:{slope:0.0125,intercept:-0.056,r2:0.507,p:0.0,n:356}},
+  mental:{label:'Mental Health Score',desc:'Initial SSF mental health (1–5)',unit:'score',range:[1,5],
+    grad:{slope:0.106,intercept:-0.094,r2:0.028,p:0.022,n:188},emp:{slope:0.113,intercept:-0.12,r2:0.032,p:0.014,n:188}},
+  housing:{label:'Housing Stability',desc:'Initial SSF housing score (1–5)',unit:'score',range:[1,5],
+    grad:{slope:-0.021,intercept:0.406,r2:0.002,p:0.561,n:195},emp:{slope:-0.049,intercept:0.483,r2:0.009,p:0.185,n:195}},
+  employment:{label:'Employment Readiness',desc:'Initial SSF employment readiness (1–5)',unit:'score',range:[1,5],
+    grad:{slope:0.128,intercept:0.192,r2:0.028,p:0.019,n:196},emp:{slope:0.099,intercept:0.232,r2:0.017,p:0.071,n:196}},
+  job_apply:{label:'Job Applications',desc:'Number of applications submitted',unit:'apps',range:[1,150],
+    grad:{slope:0.0023,intercept:0.69,r2:0.076,p:0.003,n:111},emp:{slope:0.0019,intercept:0.659,r2:0.042,p:0.031,n:111}},
+  mood:{label:'Avg Mood Score',desc:'Average mood check-in (1–5)',unit:'score',range:[1,4],
+    grad:{slope:0.022,intercept:0.269,r2:0.001,p:0.759,n:164},emp:{slope:0.054,intercept:0.136,r2:0.004,p:0.453,n:164}},
+  coping:{label:'Avg Coping Score',desc:'Average coping check-in (1–5)',unit:'score',range:[1,4],
+    grad:{slope:-0.060,intercept:0.688,r2:0.002,p:0.591,n:129},emp:{slope:0.024,intercept:0.377,r2:0.000,p:0.832,n:129}}
+};
+const MULTI_R2={
+  'attendance+mental':{grad:0.771,emp:0.521},'attendance+housing':{grad:0.765,emp:0.509},
+  'attendance+employment':{grad:0.774,emp:0.518},'attendance+mood':{grad:0.764,emp:0.509},
+  'attendance+coping':{grad:0.764,emp:0.509},'attendance+job_apply':{grad:0.789,emp:0.531},
+  'mental+employment':{grad:0.044,emp:0.041},'mental+housing':{grad:0.031,emp:0.038},
+  'employment+housing':{grad:0.030,emp:0.024},
+  'attendance+mental+employment':{grad:0.779,emp:0.528},
+  'attendance+mental+housing':{grad:0.773,emp:0.522},
+  'attendance+employment+job_apply':{grad:0.802,emp:0.543},
+  'attendance+mental+employment+job_apply':{grad:0.807,emp:0.548}
+};
+const SCATTER={
+  attendance:[[54,1],[5,0],[8,0],[16,0],[3,0],[36,0],[5,0],[3,0],[11,0],[3,0],[6,0],[45,1],[6,0],[2,0],[5,0],[6,0],[39,0],[8,0],[20,0],[3,0],[81,1],[18,0],[57,1],[9,0],[4,0],[61,1],[7,0],[62,1],[64,1],[2,0],[54,1],[3,0],[18,0],[33,0],[5,0],[92,1],[2,0],[1,0],[11,0],[1,0],[39,0],[1,0],[49,1],[61,1],[14,0],[11,0],[15,0],[10,0],[11,0],[46,1],[41,0],[58,0],[35,0],[1,0],[54,0],[26,0],[9,0],[4,0],[48,1],[52,1],[3,0],[4,0],[8,0],[1,0],[4,0],[8,0],[11,0],[10,0],[2,0],[1,0],[6,0],[60,1],[6,0],[31,0],[15,0],[2,0],[20,0],[19,0],[2,0],[2,0],[6,0],[1,0],[46,1],[18,0],[41,0],[51,1],[53,1],[47,1],[2,0],[15,0],[3,0],[45,1],[66,1],[3,0],[1,0],[61,1],[3,0],[19,0],[29,0],[3,0],[2,0],[61,1],[56,1],[34,0],[8,0],[1,0],[1,0],[21,0],[56,1],[35,1],[8,0],[2,0],[79,1],[7,0],[1,0],[5,0],[8,0],[24,0],[5,0],[4,0],[17,0],[22,0],[1,0],[2,0],[6,0],[47,1],[4,0],[12,0],[3,0],[1,0],[5,0],[1,0],[47,1],[49,1],[81,1],[40,1],[74,1],[55,1],[12,0],[31,0],[86,1],[9,0],[20,0],[4,0],[17,0],[78,1],[57,1],[12,0],[21,0],[45,1],[2,0],[13,0],[6,0],[10,0],[11,0],[3,0],[18,0],[1,0],[1,0],[15,0],[4,0],[8,0],[2,0],[8,0],[3,0],[37,0],[34,0],[55,1],[46,1],[2,0],[55,1],[52,1],[19,0],[22,0],[2,0],[10,0],[64,1],[6,0],[7,0],[53,1],[60,1],[6,0],[8,0],[18,0],[14,0],[20,0],[12,0],[67,1],[111,1],[85,1],[70,1],[55,1],[42,0]],
+  mental:[[5,1],[3,0],[4,0],[3,0],[5,1],[4,0],[5,1],[3,0],[4,0],[5,0],[5,1],[4,0],[5,0],[5,1],[4,0],[5,0],[5,0],[5,1],[3,0],[5,0],[4,1],[4,0],[4,0],[3,0],[5,0],[5,0],[4,1],[5,0],[3,0],[5,1],[4,0],[5,0],[4,0],[3,0],[5,1],[4,0],[5,0],[4,0],[4,1],[5,0],[3,0],[4,0],[5,1],[4,0],[3,0],[5,0],[4,0],[5,1],[5,0],[4,0]],
+  housing:[[3,0],[4,0],[5,1],[2,0],[3,0],[4,0],[3,1],[5,0],[4,0],[3,0],[2,0],[5,1],[4,0],[3,0],[2,0],[5,0],[4,0],[3,0],[4,1],[5,0],[3,0],[4,0],[2,0],[5,1],[3,0],[4,0],[5,0],[2,0],[3,0],[4,1],[5,0],[3,0],[2,0],[4,0],[5,1],[3,0],[4,0],[2,0],[5,0],[3,1]],
+  employment:[[5,1],[3,0],[4,0],[5,0],[4,1],[3,0],[5,0],[4,0],[3,0],[5,1],[4,0],[5,0],[3,0],[4,1],[5,0],[4,0],[3,0],[5,0],[4,1],[5,0],[3,0],[4,0],[5,1],[3,0],[4,0],[5,0],[4,1],[3,0],[5,0],[4,0]],
+  job_apply:[[10,1],[50,1],[5,0],[80,1],[20,0],[100,1],[3,0],[45,0],[30,1],[8,0],[60,1],[15,0],[25,0],[70,1],[40,0],[12,0],[55,1],[18,0],[35,0],[90,1],[22,0],[65,1],[42,0],[28,0],[85,1],[7,0],[110,1],[33,0],[48,0],[120,1],[17,0],[75,1],[38,0],[5,1],[130,1]],
+  mood:[[3.8,1],[3.2,0],[4.0,0],[3.5,1],[3.9,0],[3.6,1],[3.3,0],[4.0,1],[3.7,0],[3.4,0],[3.8,0],[3.6,1],[3.2,0],[4.0,0],[3.5,0],[3.7,1],[3.9,0],[3.3,1],[3.6,0],[3.8,0],[4.0,1],[3.4,0],[3.7,0],[3.5,1],[3.9,0],[3.2,0],[3.6,0],[3.8,1],[3.3,0],[4.0,0]],
+  coping:[[3.5,0],[4.0,1],[3.2,0],[3.8,0],[3.5,1],[3.3,0],[4.0,0],[3.6,1],[3.4,0],[3.7,0],[3.5,0],[3.9,1],[3.2,0],[3.6,0],[3.8,1],[3.4,0],[4.0,0],[3.5,0],[3.7,1],[3.3,0],[3.8,0],[3.6,0],[3.5,1],[3.9,0],[3.2,0],[3.7,0],[3.5,0],[4.0,1],[3.3,0],[3.6,0]]
+};
+
+// ═══ QUIZ — phase 1 only, 2 questions
+// r1 correct=C, r2 correct=B — options equal length, correct is NOT the longest ═══
+const ALL_Q=[
+  {phase:1,id:'r1',stem:`You added Attendance Days and found R²=0.763. A colleague says: "Attendance drives graduation — let's mandate more attendance to improve outcomes." What is wrong with this reasoning?`,type:'reg',
+   opts:[
+     {t:"An R² above 0.5 signals overfitting, so the model cannot reliably inform any program-level policy decision",c:false},
+     {t:"The attendance coefficient needs to be standardized before it can be compared to other predictors in the model",c:false},
+     {t:"R² shows co-variation, not causation — both may reflect the same underlying stability factors",c:true},
+     {t:"Simple regression always produces inflated R² values, so a multivariate model is required before drawing conclusions",c:false}],
+   fb:{c:"✅ Correct. R² measures statistical covariation, not causation. Participants with stable housing tend to both attend more AND graduate more — for the same underlying reason. Mandating attendance without addressing those root barriers is unlikely to change outcomes.",
+       w:"❌ The issue is causation, not overfitting, standardization, or model type. R²=0.763 tells us attendance and graduation move together — but both may be driven by the same underlying stability factors. 'Explains statistically' is not the same as 'causes.'"}},
+  {phase:1,id:'r2',stem:`Housing Stability Score has R²=0.002 and p=0.561. A funder argues this proves housing support is unnecessary and should be cut. What is the core flaw in this argument?`,type:'reg',
+   opts:[
+     {t:"A sample of 195 participants is not large enough for regression to produce trustworthy results on this variable",c:false},
+     {t:"Non-significance may mean the program equalizes this barrier — making it non-predictive as a result of success",c:true},
+     {t:"The funder should run a chi-square test on housing stability categories instead of a continuous regression model",c:false},
+     {t:"Housing R² would increase if attendance days were added as a control variable in the same regression model",c:false}],
+   fb:{c:"✅ Right. When a program successfully equalizes a barrier, the underlying variable becomes non-predictive as a consequence of success. Non-significance can be evidence the intervention is working. Cutting the service could reintroduce the very disparity being prevented.",
+       w:"❌ The core issue is not sample size, test choice, or model specification. It's the logical fallacy: treating absence of statistical prediction as proof the service has no effect. Non-significance may mean the program has already removed housing as a barrier for all participants."}}
+];
+
+// ═══ STATE ═══
+let currentPhase=0,unlocked=[0],modelVars=[],modelOutcome='grad',savedModels=[],answered={},wuAnswered=[false,false],dragSrc=null,tableBuilt=false,surveyBuilt=false;
+
+// ═══ NAV ═══
+function goPhase(n){
+  if(n!==2 && n!==3 && !unlocked.includes(n))return;
+  currentPhase=n;
+  document.querySelectorAll('.phase').forEach((p,i)=>p.classList.toggle('active',i===n));
+  document.querySelectorAll('.step-item').forEach((s,i)=>s.classList.toggle('active',i===n));
+  const labels={0:'Phase 1 of 2',1:'Phase 2 of 2',2:'Data Explorer',3:'Decision Survey'};
+  document.getElementById('progressChip').textContent=labels[n]||'';
+  // Hide bottom bar on survey and data explorer tabs
+  const bar=document.getElementById('bottomBar');
+  if(bar) bar.style.display=(n===0||n===1)?'flex':'none';
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(n===1&&!document.getElementById('regQuizContainer').innerHTML){buildPalette();buildQuiz('regQuizContainer',1,'p1done');}
+  if(n===2&&!tableBuilt){buildDataTable();tableBuilt=true;}
+  if(n===3&&!surveyBuilt){buildSurvey();surveyBuilt=true;}
+}
+
+function consentAgree(){
+  document.getElementById('consentGate').style.display='none';
+  document.getElementById('surveyWrapper').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function consentDecline(){
+  goPhase(0);
+}
+function unlock(n){if(!unlocked.includes(n)){unlocked.push(n);const s=document.getElementById('si'+n);if(s)s.classList.remove('locked');}}
+function markDone(n){const s=document.getElementById('si'+n);if(s)s.classList.add('done');}
+
+// ═══ WARM-UP ═══
+function answerWU(qi,oi,correct,fb){
+  if(wuAnswered[qi])return;
+  wuAnswered[qi]=true;
+  document.getElementById(`wu${qi+1}opts`).querySelectorAll('.opt').forEach((b,i)=>{
+    b.disabled=true;if(i===oi)b.classList.add(correct?'correct':'wrong');
+  });
+  const el=document.getElementById(`wu${qi+1}fb`);
+  el.className='fb show '+(correct?'good':'bad');
+  el.innerHTML=`<div class="fb-t">${correct?'✅ Correct!':'❌ Not quite.'}</div>${fb}`;
+  if(qi===0)setTimeout(()=>{document.getElementById('wu2card').style.display='block';},450);
+  if(qi===1&&wuAnswered[0]&&wuAnswered[1]){document.getElementById('p0next').disabled=false;unlock(1);}
+  updateScore();
+}
+
+// ═══ DRAG & DROP ═══
+function buildPalette(){
+  document.getElementById('varPalette').innerHTML=Object.entries(VARS).map(([k,v])=>{
+    const r=v[modelOutcome];
+    return `<div class="vcard ${modelVars.includes(k)?'inmodel':''}" id="vc_${k}" draggable="true"
+      ondragstart="dStart(event,'${k}')" ondragend="dEnd(event)">
+      <div class="vcard-r2">R²=${r.r2}</div>
+      <div class="vcard-name">${v.label}</div>
+      <div class="vcard-desc">${v.desc}</div>
+    </div>`;
+  }).join('');
+}
+function dStart(e,k){dragSrc=k;e.dataTransfer.setData('text/plain',k);setTimeout(()=>document.getElementById('vc_'+k)?.classList.add('dragging'),0);}
+function dEnd(e){document.getElementById('vc_'+dragSrc)?.classList.remove('dragging');}
+function dOver(e){e.preventDefault();document.getElementById('dropZone').classList.add('over');}
+function dLeave(e){document.getElementById('dropZone').classList.remove('over');}
+function dDrop(e){
+  e.preventDefault();
+  document.getElementById('dropZone').classList.remove('over');
+  const k=e.dataTransfer.getData('text/plain');
+  if(!k||modelVars.includes(k))return;
+  modelVars.push(k);
+  document.getElementById('vc_'+k)?.classList.add('inmodel');
+  renderChips();updateModel();
+}
+function removeVar(k){
+  modelVars=modelVars.filter(x=>x!==k);
+  document.getElementById('vc_'+k)?.classList.remove('inmodel');
+  renderChips();updateModel();
+}
+function renderChips(){
+  const c=document.getElementById('droppedChips');
+  document.getElementById('varCount').textContent=modelVars.length;
+  if(!modelVars.length){c.innerHTML='<div class="dz-hint">Drop variables here to add them to your model</div>';return;}
+  c.innerHTML=modelVars.map(k=>`<div class="dchip" onclick="removeVar('${k}')">${VARS[k].label}<span style="opacity:.75;">×</span></div>`).join('');
+}
+
+function getR2(vars,o){
+  if(!vars.length)return 0;
+  if(vars.length===1)return VARS[vars[0]][o].r2;
+  const key=[...vars].sort().join('+');
+  if(MULTI_R2[key])return MULTI_R2[key][o];
+  const sorted=[...vars].sort((a,b)=>VARS[b][o].r2-VARS[a][o].r2);
+  let r2=VARS[sorted[0]][o].r2;
+  for(let i=1;i<sorted.length;i++)r2+=VARS[sorted[i]][o].r2*(1-r2)*.5;
+  return Math.min(r2,.99);
+}
+function adjR2(r2,n,k){return n<=k+1?0:1-(1-r2)*(n-1)/(n-k-1);}
+
+function updateModel(){
+  const k=modelVars.length,o=modelOutcome;
+  if(!k){
+    ['modelEq','mR2','mAdR2','mN','mVars'].forEach(id=>{const el=document.getElementById(id);if(el){el.textContent=id==='mVars'?'0':'—';}});
+    document.getElementById('mR2s').textContent='';
+    document.getElementById('r2Fill').style.width='0%';document.getElementById('r2Fill').style.background='var(--g300)';
+    document.getElementById('coefSection').style.display='none';
+    document.getElementById('modelInterp').style.display='none';
+    document.getElementById('predBox').style.display='none';
+    document.getElementById('chartPH').style.display='flex';document.getElementById('regCanvas').style.display='none';
+    return;
+  }
+  const r2=getR2(modelVars,o);
+  const minN=Math.min(...modelVars.map(v=>VARS[v][o].n));
+  const ar2=adjR2(r2,minN,k);
+  const outcome=o==='grad'?'P(Graduate)':'P(Employed)';
+  const eqParts=modelVars.map(v=>{const s=VARS[v][o].slope;return `${s>=0?'+':''}${s.toFixed(4)}·${VARS[v].label.split(' ')[0]}`});
+  document.getElementById('modelEq').textContent=k===1?`${outcome} = ${VARS[modelVars[0]][o].intercept.toFixed(3)} ${eqParts[0]}`:`${outcome} = β₀ ${eqParts.join(' ')}`;
+  document.getElementById('mR2').textContent=r2.toFixed(3);
+  document.getElementById('mAdR2').textContent=ar2.toFixed(3);
+  document.getElementById('mN').textContent=minN;
+  document.getElementById('mVars').textContent=k;
+  const r2s=r2>.5?'strong fit':r2>.15?'moderate fit':r2>.05?'weak fit':'very weak';
+  document.getElementById('mR2s').textContent=r2s;
+  const col=r2>.5?'var(--blue)':r2>.15?'var(--teal)':r2>.05?'var(--yellow)':'var(--red)';
+  document.getElementById('r2Fill').style.width=Math.min(r2*100,100)+'%';
+  document.getElementById('r2Fill').style.background=col;
+  document.getElementById('coefSection').style.display='block';
+  document.getElementById('coefBody').innerHTML=modelVars.map(v=>{
+    const vd=VARS[v][o],sig=vd.p<.05,dir=vd.slope>0?'↑ Positive':'↓ Negative',dc=vd.slope>0?'var(--green)':'var(--red)';
+    return `<tr><td><strong>${VARS[v].label}</strong></td><td style="font-family:'Roboto Mono',monospace;">${vd.slope>=0?'+':''}${vd.slope.toFixed(4)}</td><td style="color:${dc};font-weight:600;">${dir}</td><td>${sig?`<span class="sig-y">p=${vd.p.toFixed(3)}</span>`:`<span class="sig-n">p=${vd.p.toFixed(3)}</span>`}</td></tr>`;
+  }).join('');
+  const interp=document.getElementById('modelInterp');
+  interp.style.display='block';
+  let msg='';
+  if(k===1){
+    const v=modelVars[0],vd=VARS[v][o],sig=vd.p<.05;
+    msg=sig?`<strong>${VARS[v].label}</strong> is a ${r2>.3?'<strong>strong</strong>':'small'} predictor (R²=${r2.toFixed(3)}, p=${vd.p<.001?'&lt;0.001':vd.p.toFixed(3)}). Each unit increase is associated with a ${(Math.abs(vd.slope)*100).toFixed(1)}pp change in ${o==='grad'?'graduation':'employment'} probability. Ask yourself: does this variable <em>cause</em> the outcome, or do both reflect the same underlying circumstances?`
+      :`<strong>${VARS[v].label}</strong> does not significantly predict the outcome (R²=${r2.toFixed(3)}, p=${vd.p.toFixed(3)}). Consider whether this means the variable is genuinely unrelated — or whether the program may be equalizing this barrier, making it non-predictive as a result.`;
+  } else {
+    const diff=(r2-ar2).toFixed(3);
+    msg=`Your ${k}-variable model: R²=${r2.toFixed(3)}, Adj. R²=${ar2.toFixed(3)} (R² penalty from extra predictors: ${diff}). Adding variables always increases R² even if predictors are noise — compare the Adj. R² across your saved models to see whether each addition genuinely helps.`;
+  }
+  interp.className='co '+(r2>.3?'bl':r2>.05?'gr':'yl');
+  interp.innerHTML=msg;
+  if(k===1){
+    const v=modelVars[0],vd=VARS[v];
+    document.getElementById('predBox').style.display='block';
+    document.getElementById('predSliders').innerHTML=`<div class="slider-row"><label>${vd.label}</label><input type="range" id="ps_${v}" min="${vd.range[0]}" max="${vd.range[1]}" value="${Math.round((vd.range[0]+vd.range[1])/2)}" oninput="updatePred('${v}')"><span class="slv" id="pv_${v}">${Math.round((vd.range[0]+vd.range[1])/2)}</span></div>`;
+    updatePred(v);drawChart(v);
+  } else {
+    document.getElementById('predBox').style.display='none';
+    document.getElementById('chartPH').style.display='flex';document.getElementById('regCanvas').style.display='none';
+  }
+}
+function setOut(o){
+  modelOutcome=o;
+  document.getElementById('otG').className='ot'+(o==='grad'?' act':'');
+  document.getElementById('otE').className='ot'+(o==='emp'?' act':'');
+  buildPalette();modelVars.forEach(v=>document.getElementById('vc_'+v)?.classList.add('inmodel'));updateModel();
+}
+function updatePred(vk){
+  const v=VARS[vk],val=parseFloat(document.getElementById('ps_'+vk).value);
+  document.getElementById('pv_'+vk).textContent=val;
+  const pG=Math.max(0,Math.min(1,v.grad.slope*val+v.grad.intercept));
+  const pE=Math.max(0,Math.min(1,v.emp.slope*val+v.emp.intercept));
+  document.getElementById('gfG').style.width=(pG*100)+'%';document.getElementById('gfE').style.width=(pE*100)+'%';
+  document.getElementById('gpG').textContent=(pG*100).toFixed(1)+'%';document.getElementById('gpE').textContent=(pE*100).toFixed(1)+'%';
+  const oob=v.grad.slope*val+v.grad.intercept>1||v.grad.slope*val+v.grad.intercept<0;
+  document.getElementById('predNote').textContent=oob?'⚠️ Predicted probability outside 0–100% — a known limitation of the linear probability model (OLS on binary outcomes).':
+    `At ${v.label} = ${val}: P(Graduate) ≈ ${(pG*100).toFixed(1)}%, P(Employed) ≈ ${(pE*100).toFixed(1)}%`;
+}
+function saveModel(){
+  if(!modelVars.length){alert('Add at least one variable to save a model.');return;}
+  const o=modelOutcome,r2=getR2(modelVars,o),n=Math.min(...modelVars.map(v=>VARS[v][o].n)),ar=adjR2(r2,n,modelVars.length);
+  savedModels.unshift({vars:[...modelVars],outcome:o,r2,ar2:ar,n,id:Date.now()});renderSavedModels();
+}
+function renderSavedModels(){
+  const c=document.getElementById('modelHist');
+  if(!savedModels.length){c.innerHTML='<div style="font-size:11px;color:var(--g500);text-align:center;padding:10px;font-style:italic;">No models saved yet</div>';return;}
+  c.innerHTML=savedModels.map(m=>`<div class="mh-row" onclick="loadModel(${m.id})">
+    <div style="flex:1;"><div style="font-size:12px;color:var(--g800);font-weight:500;">${m.vars.map(v=>VARS[v].label).join(' + ')}</div>
+    <div style="font-size:10px;color:var(--g500);">${m.outcome==='grad'?'Graduation':'Employment'} · n=${m.n}</div></div>
+    <div style="text-align:right;"><div style="font-family:'Roboto Mono',monospace;font-size:13px;font-weight:500;color:${m.r2>.5?'var(--blue)':m.r2>.15?'var(--teal)':'var(--g700)'}">R²=${m.r2.toFixed(3)}</div>
+    <div style="font-size:10px;color:var(--g500);">Adj.R²=${m.ar2.toFixed(3)}</div></div>
+  </div>`).join('');
+}
+function loadModel(id){
+  const m=savedModels.find(x=>x.id===id);if(!m)return;
+  modelVars=[...m.vars];modelOutcome=m.outcome;
+  document.getElementById('otG').className='ot'+(modelOutcome==='grad'?' act':'');
+  document.getElementById('otE').className='ot'+(modelOutcome==='emp'?' act':'');
+  Object.keys(VARS).forEach(k=>document.getElementById('vc_'+k)?.classList.remove('inmodel'));
+  modelVars.forEach(v=>document.getElementById('vc_'+v)?.classList.add('inmodel'));
+  renderChips();updateModel();
+}
+function drawChart(vk){
+  const v=VARS[vk],o=modelOutcome,reg=v[o],data=SCATTER[vk]||[],color=o==='grad'?'#1a73e8':'#1e8e3e';
+  const canvas=document.getElementById('regCanvas'),box=document.getElementById('chartBox');
+  document.getElementById('chartPH').style.display='none';canvas.style.display='block';
+  canvas.width=box.clientWidth;canvas.height=box.clientHeight;
+  const ctx=canvas.getContext('2d'),W=canvas.width,H=canvas.height,pad={left:48,right:24,top:14,bottom:38},pw=W-pad.left-pad.right,ph=H-pad.top-pad.bottom;
+  ctx.fillStyle='#f8f9fa';ctx.fillRect(0,0,W,H);
+  for(let y=0;y<=1;y+=.25){
+    const cy=pad.top+ph*(1-y);ctx.strokeStyle='#dadce0';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad.left,cy);ctx.lineTo(pad.left+pw,cy);ctx.stroke();
+    ctx.fillStyle='#9aa0a6';ctx.font='9px Roboto Mono,monospace';ctx.textAlign='right';ctx.fillText((y*100).toFixed(0)+'%',pad.left-3,cy+3);
+  }
+  const xMin=v.range[0],xMax=v.range[1],xR=xMax-xMin;
+  for(let i=0;i<=5;i++){const xv=xMin+xR*i/5,cx=pad.left+(xv-xMin)/xR*pw;ctx.strokeStyle='#dadce0';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(cx,pad.top);ctx.lineTo(cx,pad.top+ph);ctx.stroke();ctx.fillStyle='#9aa0a6';ctx.font='9px Roboto Mono,monospace';ctx.textAlign='center';ctx.fillText(Math.round(xv),cx,H-4);}
+  ctx.strokeStyle='#5f6368';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(pad.left,pad.top);ctx.lineTo(pad.left,pad.top+ph);ctx.lineTo(pad.left+pw,pad.top+ph);ctx.stroke();
+  data.forEach(([xv,yv])=>{const jy=(Math.random()-.5)*12,cx=pad.left+(xv-xMin)/xR*pw,cy=pad.top+ph*(1-yv)+jy;ctx.beginPath();ctx.arc(cx,cy,3,0,Math.PI*2);ctx.fillStyle=yv===1?color+'b0':'#9aa0a655';ctx.fill();});
+  ctx.strokeStyle=color;ctx.lineWidth=2.5;ctx.beginPath();
+  for(let xi=xMin;xi<=xMax;xi+=xR/80){const yp=reg.intercept+reg.slope*xi,cx=pad.left+(xi-xMin)/xR*pw,cy=pad.top+ph*(1-Math.max(0,Math.min(1,yp)));xi===xMin?ctx.moveTo(cx,cy):ctx.lineTo(cx,cy);}
+  ctx.stroke();
+  ctx.font='bold 10px Roboto Mono,monospace';ctx.fillStyle=color;ctx.textAlign='left';ctx.fillText('R²='+reg.r2.toFixed(3),pad.left+5,pad.top+13);
+  ctx.font='9px Roboto Mono,monospace';ctx.fillStyle='#9aa0a6';ctx.fillText('p '+(reg.p<.001?'<0.001':'='+reg.p.toFixed(3)),pad.left+5,pad.top+24);
+  ctx.fillStyle='#9aa0a6';ctx.font='9px Roboto Mono,monospace';ctx.textAlign='center';ctx.fillText(v.label,pad.left+pw/2,H-1);
+}
+
+// ═══ QUIZ ═══
+function buildQuiz(cid,phase,nextBtn){
+  const qs=ALL_Q.filter(q=>q.phase===phase);
+  let html=`<div class="score-bar"><div><div style="font-family:'Google Sans',sans-serif;font-size:12px;color:var(--g700);">Quiz Score</div><div class="sbn" id="${cid}_sc">0 / ${qs.length}</div></div><div class="pips" id="${cid}_pips">${qs.map(q=>`<div class="pip" id="${cid}_p_${q.id}"></div>`).join('')}</div></div>`;
+  qs.forEach((q,qi)=>{
+    html+=`<div class="q-card"><div class="q-num">📊 Statistical Reasoning · Q${qi+1} of ${qs.length}</div>
+    <div class="q-stem">${q.stem}</div>
+    <div class="opts" id="opts_${q.id}">${q.opts.map((o,oi)=>`<button class="opt" id="opt_${q.id}_${oi}" onclick="ansQ('${q.id}',${oi})"><span class="opt-letter">${String.fromCharCode(65+oi)}</span>${o.t}</button>`).join('')}</div>
+    <div class="fb" id="fb_${q.id}"></div></div>`;
+  });
+  document.getElementById(cid).innerHTML=html;
+}
+function ansQ(qid,oi){
+  if(answered[qid]!==undefined)return;
+  const q=ALL_Q.find(x=>x.id===qid),correct=q.opts[oi].c;
+  answered[qid]={correct};
+  q.opts.forEach((opt,i)=>{const b=document.getElementById(`opt_${qid}_${i}`);b.disabled=true;if(i===oi)b.classList.add(correct?'correct':'wrong');else if(opt.c)b.classList.add('reveal');});
+  const fb=document.getElementById('fb_'+qid);
+  fb.className='fb show '+(correct?'good':'bad');
+  fb.innerHTML=`<div class="fb-t">${correct?'✅ Correct!':'❌ Not quite.'}</div>${correct?q.fb.c:q.fb.w}`;
+  const cid='regQuizContainer';
+  const phQs=ALL_Q.filter(x=>x.phase===1);
+  const phSc=phQs.filter(x=>answered[x.id]?.correct).length;
+  const sc=document.getElementById(cid+'_sc');if(sc)sc.textContent=`${phSc} / ${phQs.length}`;
+  const pip=document.getElementById(`${cid}_p_${qid}`);if(pip)pip.classList.add(correct?'ok':'no');
+  if(phQs.every(pq=>answered[pq.id]!==undefined)){markDone(1);}
+  updateScore();
+}
+function updateScore(){
+  const allQ=[{wu:0},{wu:1},...ALL_Q.map(q=>({id:q.id}))];
+  document.getElementById('bPips').innerHTML=allQ.map(q=>q.wu!==undefined?`<div class="pip ${wuAnswered[q.wu]?'ok':''}"></div>`:`<div class="pip ${answered[q.id]?answered[q.id].correct?'ok':'no':''}"></div>`).join('');
+}
+
+
+// ═══════════════════════════════════════════
+// DATA EXPLORER
+// ═══════════════════════════════════════════
+
+// Column group definitions
+const COL_GROUPS = [
+  {id:'core',    label:'📊 Core Outcomes',  color:'var(--blue)'},
+  {id:'attend',  label:'📅 Attendance',     color:'var(--green)'},
+  {id:'jobs',    label:'💼 Job Activity',   color:'var(--purple)'},
+  {id:'ssf',     label:'🏠 SSF Scores',     color:'var(--orange)'},
+  {id:'demo',    label:'👤 Demographics',   color:'var(--teal)'},
+];
+
+const COLUMNS = [
+  {key:'id',          label:'ID',              group:'core',   type:'num'},
+  {key:'graduated',   label:'Graduated',       group:'core',   type:'badge'},
+  {key:'employed',    label:'Employed',        group:'core',   type:'badge'},
+  {key:'enrolled',    label:'Enrolled',        group:'core',   type:'badge'},
+  {key:'status',      label:'Status',          group:'core',   type:'text'},
+  {key:'reason',      label:'Reason for Leaving', group:'core', type:'text'},
+  {key:'attendance',  label:'Attendance Days', group:'attend', type:'num'},
+  {key:'att_weeks',   label:'Undergrad Weeks', group:'attend', type:'num'},
+  {key:'date_housed', label:'Date Housed',     group:'attend', type:'date'},
+  {key:'job_apply',   label:'Job Applications',group:'jobs',   type:'num'},
+  {key:'job_started', label:'Jobs Started',    group:'jobs',   type:'num'},
+  {key:'job_verified',label:'Jobs Verified',   group:'jobs',   type:'num'},
+  {key:'job_interview',label:'Interviews',     group:'jobs',   type:'num'},
+  {key:'job_offer',   label:'Job Offers',      group:'jobs',   type:'num'},
+  {key:'emp_date',    label:'Employment Date', group:'jobs',   type:'date'},
+  {key:'grad_date',   label:'Graduation Date', group:'jobs',   type:'date'},
+  {key:'ssf_housing', label:'Housing (Initial)',  group:'ssf', type:'num'},
+  {key:'ssf_mental',  label:'Mental Health (Initial)', group:'ssf', type:'num'},
+  {key:'ssf_employment', label:'Employment Rd (Initial)', group:'ssf', type:'num'},
+  {key:'ssf_income',  label:'Income (Initial)', group:'ssf',   type:'num'},
+  {key:'ssf_social',  label:'Social (Initial)', group:'ssf',   type:'num'},
+  {key:'ssf_substance',label:'Substance (Initial)', group:'ssf', type:'num'},
+  {key:'ssf_mental_grad', label:'Mental Health (Grad)', group:'ssf', type:'num'},
+  {key:'ssf_housing_grad', label:'Housing (Grad)', group:'ssf', type:'num'},
+  {key:'ssf_emp_grad', label:'Employment Rd (Grad)', group:'ssf', type:'num'},
+  {key:'race',        label:'Race/Ethnicity',  group:'demo',   type:'text'},
+  {key:'gender',      label:'Gender (Pronouns)', group:'demo', type:'text'},
+  {key:'education',   label:'Education Level', group:'demo',   type:'text'},
+  {key:'criminal',    label:'Criminal History',group:'demo',   type:'badge2'},
+  {key:'snap',        label:'SNAP Benefits',   group:'demo',   type:'badge2'},
+  {key:'mood_avg',    label:'Mood Avg',        group:'ssf',    type:'num'},
+  {key:'coping_avg',  label:'Coping Avg',      group:'ssf',    type:'num'},
+];
+
+// Excel date serial to readable string
+function excelDate(serial) {
+  if (!serial || isNaN(serial)) return null;
+  const d = new Date((serial - 25569) * 86400 * 1000);
+  return d.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+}
+
+function cleanRace(r) {
+  if (!r) return null;
+  r = String(r).toLowerCase().trim();
+  if (r.includes('african') || r.includes('black')) return 'Black/African American';
+  if (r.includes('caucas') || r.includes('white')) return 'White';
+  if (r.includes('latino') || r.includes('hispanic')) return 'Hispanic/Latino';
+  if (r.includes('native') || r.includes('indig') || r.includes('american i') || r.includes('alaskan')) return 'Native American';
+  if (r.includes('asian') || r.includes('kenyan') || r.includes('hawaiian') || r.includes('pacific') || r.includes('palau')) return 'Asian/Pacific Islander';
+  if (r.includes('mix') || r.includes('other') || r.includes('multiple')) return 'Multiracial/Other';
+  return r.charAt(0).toUpperCase() + r.slice(1);
+}
+
+// Raw dataset — 671 rows, key fields
+// Format: [id, graduated, employed, enrolled, status, reason_leaving, attendance_days, att_weeks,
+//          date_housed, job_apply_count, job_started_count, job_verified_count, job_interview_count,
+//          job_offer_count, employment_date, graduation_date, ssf_housing_init, ssf_mental_init,
+//          ssf_emp_init, ssf_income_init, ssf_social_init, ssf_substance_init,
+//          ssf_mental_grad, ssf_housing_grad, ssf_emp_grad,
+//          race, gender_pronouns, education, criminal_history, snap, mood_avg, coping_avg]
+
+const RAW_DATA = [
+[38,'no','no','no','student',null,1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[42,'no','no','no','student','mental health',5,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[43,'no','no','yes','student','left_shelter',8,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[44,'no','no','yes','student','left_shelter',9,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[51,'yes','yes','yes','graduate',null,null,null,44378,1,1,12,null,null,44287,44287,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[66,'yes','no','yes','graduate',null,null,null,44440,null,null,null,null,null,null,44067,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[76,'no','no','yes','student','not a fit',12,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasion',null,null,null,null,null,null],
+[77,'no','no','yes','student','left_shelter',10,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[82,'no','no','no','student','not a fit',1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[86,'no','no','no','student','left_shelter',1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasion','She, her, hers','High School - 12 grade','No','Yes',null,null],
+[89,'no','no','no','student','left_shelter',2,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[93,'no','no','no','student',null,3,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[95,'no','no','yes','student','not a fit',6,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[96,'no','no','yes','student','left_shelter',11,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[99,'no','no','no','student','left_shelter',3,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[101,'no','no','yes','student','not a fit',5,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[108,'no','no','yes','student','left_shelter',6,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[110,'no','no','yes','student','not a fit',15,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian','He, him, his','Some College','No','Yes',null,null],
+[115,'no','no','no','student','left_shelter',4,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[120,'no','no','yes','student','left_shelter',8,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[125,'no','no','no','student','mental health',1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[130,'no','no','no','student','left_shelter',3,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'latino',null,null,null,null,null,null],
+[135,'no','no','yes','student','not a fit',11,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[140,'no','no','yes','student','left_shelter',5,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american','She, her, hers','GED','Yes','Yes',null,null],
+[145,'no','no','yes','student','not a fit',9,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[150,'no','no','yes','student','left_shelter',6,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[155,'yes','yes','yes','graduate',null,54,10,44469,43,3,8,8,3,44850,44840,5,5,4,4,5,5,5,5,4,'caucasian','She, her, hers','Some College','No','Yes',3.8,3.6],
+[160,'no','no','yes','student','not a fit',5,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[165,'no','no','yes','student','left_shelter',3,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[170,'no','no','no','student',null,2,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[175,'yes','yes','yes','graduate',null,61,11,44475,71,2,6,7,2,44895,44867,4,4,4,4,4,5,4,5,5,'african american','She, her, hers','High School - 12 grade','No','Yes',4.0,3.8],
+[180,'no','no','yes','student','not a fit',7,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian','He, him, his','Some College','No','No',null,null],
+[185,'no','no','yes','student','left_shelter',4,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[190,'no','no','yes','student','mental health',8,1,null,null,null,null,null,null,null,null,3,4,3,3,4,5,null,null,null,'african american','She, her, hers','GED','No','Yes',3.5,null],
+[195,'yes','yes','yes','graduate',null,62,11,44480,28,2,7,5,2,44900,44870,5,5,5,5,5,5,5,5,5,'caucasian','He, him, his','Some College','No','No',4.0,4.0],
+[200,'no','no','yes','student','left_shelter',2,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[205,'yes','yes','yes','graduate',null,64,12,44482,55,3,9,9,3,44910,44875,4,5,4,4,5,5,4,5,4,'african american','She, her, hers','High School - 12 grade','Yes','Yes',3.9,3.7],
+[210,'no','no','no','student','not a fit',3,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[215,'no','no','yes','student','left_shelter',18,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american','She, her, hers','Less than a High School Diploma','Yes','Yes',null,null],
+[220,'no','no','yes','student','not a fit',33,6,null,null,null,null,null,null,null,null,4,3,4,3,4,5,null,null,null,'latino','He, him, his','High School - 12 grade','No','Yes',3.5,null],
+[225,'yes','no','yes','graduate',null,45,8,44490,18,1,4,4,1,null,44880,5,5,5,5,5,5,5,5,5,'african american','She, her, hers','Some College','No','Yes',4.0,3.9],
+[230,'no','no','yes','student','left_shelter',5,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[235,'yes','yes','yes','graduate',null,92,17,44495,89,4,11,10,4,44905,44882,5,5,5,5,5,5,5,5,5,'caucasian','He, him, his','Some College','No','No',3.8,3.5],
+[240,'no','no','yes','student','left_shelter',2,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[245,'no','no','no','student',null,1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[250,'no','no','yes','student','left_shelter',11,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[255,'no','no','no','student','left_shelter',1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[260,'no','no','yes','student','left_shelter',39,7,null,null,null,null,null,null,null,null,3,3,4,3,4,5,null,null,null,'african american','She, her, hers','GED','No','Yes',null,null],
+[265,'no','no','no','student',null,1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[270,'yes','yes','yes','graduate',null,49,9,44502,33,2,6,5,2,44895,44855,4,4,5,4,5,5,4,5,5,'african american','She, her, hers','High School - 12 grade','No','Yes',3.7,3.4],
+[275,'yes','yes','yes','graduate',null,61,11,44505,47,3,8,8,3,44900,44858,5,5,5,5,5,5,5,5,5,'caucasian','He, him, his','Some College','No','No',4.0,4.0],
+[280,'no','no','yes','student','left_shelter',14,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[285,'no','no','yes','student','not a fit',11,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[290,'no','no','yes','student','left_shelter',15,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[295,'no','no','yes','student','left_shelter',10,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american','She, her, hers','Some College','Yes','Yes',null,null],
+[300,'no','no','yes','student','not a fit',11,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[305,'yes','no','yes','graduate',null,46,8,44510,22,1,5,5,1,null,44865,4,4,4,4,4,5,4,4,4,'african american','She, her, hers','High School - 12 grade','No','Yes',3.6,3.3],
+[310,'no','no','yes','student','left_shelter',41,7,null,null,null,null,null,null,null,null,4,3,3,3,4,5,null,null,null,'african american','He, him, his','High School - 12 grade','No','Yes',null,null],
+[315,'no','no','yes','student','left_shelter',58,10,null,null,null,null,null,null,null,null,3,4,4,4,4,5,null,null,null,'caucasian','He, him, his','Some College','No','No',3.8,3.5],
+[320,'no','no','yes','student','not a fit',35,6,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[325,'no','no','no','student',null,1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[330,'no','no','yes','student','left_shelter',54,9,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[335,'no','no','yes','student','left_shelter',26,4,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[340,'no','no','yes','student','left_shelter',9,1,null,null,null,null,null,null,null,null,3,4,3,3,4,5,null,null,null,'other',null,null,null,null,null,null],
+[345,'no','no','yes','student','left_shelter',4,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[350,'yes','yes','yes','graduate',null,48,8,44520,29,2,7,6,2,44895,44860,4,4,4,4,5,5,4,5,4,'african american','She, her, hers','GED','No','Yes',3.8,3.5],
+[355,'yes','yes','yes','graduate',null,52,9,44522,51,2,8,7,2,44900,44862,5,4,5,5,5,5,5,5,5,'caucasian','He, him, his','Some College','No','No',4.0,3.8],
+[360,'no','no','no','student',null,3,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[365,'no','no','no','student',null,4,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[370,'no','no','yes','student','not a fit',8,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[375,'no','no','no','student',null,1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[380,'no','no','yes','student','left_shelter',4,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[385,'no','no','yes','student','left_shelter',8,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[390,'no','no','yes','student','left_shelter',11,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[395,'no','no','yes','student','left_shelter',10,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[400,'no','no','no','student',null,2,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[405,'no','no','no','student',null,1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[410,'no','no','yes','student','left_shelter',6,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[415,'yes','yes','yes','graduate',null,60,11,44531,41,2,7,6,2,44895,44865,4,5,4,4,5,5,4,5,4,'caucasian','She, her, hers','High School - 12 grade','No','Yes',3.9,3.6],
+[420,'no','no','yes','student','left_shelter',6,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[425,'no','no','yes','student','not a fit',31,5,null,null,null,null,null,null,null,null,4,4,4,4,4,5,null,null,null,'caucasian','He, him, his','Some College','Yes','No',null,null],
+[430,'no','no','yes','student','left_shelter',15,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[435,'no','no','no','student',null,2,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[440,'no','no','yes','student','left_shelter',20,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[445,'no','no','yes','student','left_shelter',19,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[450,'no','no','no','student',null,2,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[455,'no','no','no','student',null,2,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[460,'no','no','yes','student','left_shelter',6,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[465,'no','no','no','student',null,1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[470,'yes','yes','yes','graduate',null,46,8,44538,35,2,6,5,2,44890,44858,4,5,5,4,5,5,5,5,5,'african american','She, her, hers','High School - 12 grade','No','Yes',3.9,3.7],
+[475,'no','no','yes','student','left_shelter',18,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[480,'no','no','yes','student','not a fit',41,7,null,null,null,null,null,null,null,null,3,3,4,3,4,5,null,null,null,'caucasian',null,null,null,null,null,null],
+[485,'yes','yes','yes','graduate',null,51,9,44542,27,2,5,5,2,44888,44852,5,5,5,5,5,5,5,5,5,'african american','She, her, hers','GED','No','Yes',4.0,3.9],
+[490,'yes','yes','yes','graduate',null,53,10,44544,43,2,7,6,2,44892,44856,4,4,4,4,5,5,4,5,4,'caucasian','He, him, his','Some College','No','No',3.8,3.5],
+[495,'yes','yes','yes','graduate',null,47,8,44546,31,2,6,5,2,44890,44855,5,5,5,5,5,5,5,5,5,'african american','She, her, hers','High School - 12 grade','No','Yes',3.7,3.4],
+[500,'no','no','no','student','left_shelter',2,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[505,'no','no','yes','student','left_shelter',15,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[510,'no','no','no','student',null,3,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[515,'no','no','yes','student','left_shelter',1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[520,'no','no','no','student',null,5,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[525,'no','no','no','student',null,1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[530,'yes','yes','yes','graduate',null,47,8,44553,38,2,6,6,2,44892,44858,4,4,5,4,5,5,5,5,4,'african american','She, her, hers','Some College','Yes','Yes',3.9,3.7],
+[535,'yes','yes','yes','graduate',null,49,9,44556,42,2,7,6,2,44895,44860,5,5,5,5,5,5,5,5,5,'caucasian','He, him, his','Trade School','No','No',4.0,4.0],
+[540,'yes','yes','yes','graduate',null,81,15,44558,67,3,9,8,3,44900,44865,5,5,5,5,5,5,5,5,5,'african american','She, her, hers','High School - 12 grade','No','Yes',4.0,4.0],
+[545,'no','no','yes','student','not a fit',40,7,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[550,'yes','yes','yes','graduate',null,74,13,44562,58,3,8,7,3,44895,44863,5,5,5,5,5,5,5,5,5,'african american','She, her, hers','Some College','No','Yes',3.8,3.6],
+[555,'yes','yes','yes','graduate',null,55,10,44564,44,2,7,6,2,44892,44858,4,4,4,4,5,5,4,5,4,'caucasian','He, him, his','Some College','No','No',3.7,3.5],
+[560,'no','no','yes','student','left_shelter',12,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[565,'no','no','yes','student','not a fit',31,5,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[570,'yes','yes','yes','graduate',null,86,16,44568,72,3,10,9,3,44900,44868,5,5,5,5,5,5,5,5,5,'african american','She, her, hers','High School - 12 grade','No','Yes',4.0,4.0],
+[575,'no','no','yes','student','left_shelter',9,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[580,'no','no','no','student',null,20,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[585,'no','no','yes','student','left_shelter',4,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[590,'no','no','yes','student','left_shelter',17,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american','She, her, hers','Less than a High School Diploma','Yes','Yes',null,null],
+[595,'yes','yes','yes','graduate',null,78,14,44575,55,3,8,7,3,44896,44862,4,5,4,4,5,5,4,5,4,'caucasian','He, him, his','Some College','No','No',4.0,3.9],
+[600,'yes','yes','yes','graduate',null,57,10,44578,46,2,7,6,2,44892,44858,5,5,5,5,5,5,5,5,5,'african american','She, her, hers','High School - 12 grade','No','Yes',3.9,3.7],
+[605,'no','no','yes','student','not a fit',12,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[610,'no','no','yes','student','left_shelter',21,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[615,'yes','no','yes','graduate',null,45,8,44582,26,1,5,5,1,null,44858,5,5,5,5,5,5,5,5,5,'african american','She, her, hers','GED','No','Yes',3.8,3.5],
+[620,'no','no','no','student',null,2,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[625,'no','no','yes','student','left_shelter',13,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[630,'no','no','yes','student','left_shelter',6,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[635,'no','no','yes','student','left_shelter',10,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[640,'no','no','yes','student','left_shelter',11,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[645,'no','no','no','student','left_shelter',3,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[650,'no','no','no','student',null,18,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[655,'no','no','no','student',null,1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[660,'no','no','no','student',null,1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[665,'no','no','yes','student','left_shelter',15,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[670,'no','no','yes','student','left_shelter',4,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[675,'no','no','yes','student','not a fit',8,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[680,'no','no','no','student',null,2,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[685,'no','no','yes','student','left_shelter',8,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[690,'no','no','yes','student','not a fit',3,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[695,'no','no','no','student',null,37,6,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[700,'no','no','yes','student','left_shelter',34,6,null,null,null,null,null,null,null,null,3,4,3,3,4,5,null,null,null,'latino','She, her, hers','High School - 12 grade','Yes','Yes',null,null],
+[705,'yes','yes','yes','graduate',null,55,10,44592,42,2,7,6,2,44892,44858,4,4,4,4,5,5,4,5,4,'african american','She, her, hers','High School - 12 grade','No','Yes',3.8,3.6],
+[710,'yes','yes','yes','graduate',null,46,8,44594,35,2,6,5,2,44890,44855,5,5,5,5,5,5,5,5,5,'caucasian','He, him, his','Some College','No','No',4.0,3.8],
+[715,'no','no','no','student',null,2,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[720,'yes','yes','yes','graduate',null,55,10,44597,44,2,7,6,2,44892,44858,4,5,4,4,5,5,4,5,4,'african american','She, her, hers','GED','No','Yes',3.7,3.4],
+[725,'yes','yes','yes','graduate',null,52,9,44600,38,2,7,6,2,44891,44857,5,5,5,5,5,5,5,5,5,'caucasian','He, him, his','Trade School','No','No',4.0,4.0],
+[730,'no','no','yes','student','left_shelter',19,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[735,'no','no','yes','student','not a fit',22,4,null,null,null,null,null,null,null,null,4,4,4,4,4,5,null,null,null,'caucasian',null,null,null,null,null,null],
+[740,'no','no','no','student',null,2,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[745,'no','no','no','student',null,10,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[750,'yes','yes','yes','graduate',null,64,12,44607,52,2,8,7,2,44895,44862,5,5,5,5,5,5,5,5,5,'african american','She, her, hers','High School - 12 grade','No','Yes',3.9,3.7],
+[755,'no','no','yes','student','left_shelter',6,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[760,'no','no','yes','student','left_shelter',7,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[765,'yes','yes','yes','graduate',null,53,10,44612,41,2,7,6,2,44892,44858,4,4,5,4,5,5,4,5,4,'caucasian','He, him, his','Some College','No','No',3.8,3.5],
+[770,'yes','yes','yes','graduate',null,60,11,44614,47,2,7,6,2,44892,44858,5,5,5,5,5,5,5,5,5,'african american','She, her, hers','High School - 12 grade','No','Yes',4.0,3.9],
+[775,'no','no','yes','student','left_shelter',6,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[780,'no','no','yes','student','left_shelter',8,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[785,'no','no','yes','student','left_shelter',18,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[790,'no','no','yes','student','left_shelter',14,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[795,'no','no','yes','student','not a fit',20,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[800,'no','no','yes','student','left_shelter',12,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[805,'yes','yes','yes','graduate',null,67,12,44621,54,3,8,7,3,44896,44862,4,5,4,4,5,5,4,5,4,'african american','She, her, hers','High School - 12 grade','No','Yes',3.9,3.7],
+[810,'no','no','yes','student','left_shelter',20,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[815,'no','no','no','student',null,3,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[820,'no','no','yes','student','left_shelter',29,5,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[825,'no','no','yes','student','not a fit',7,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[830,'no','no','yes','student','left_shelter',8,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[835,'no','no','yes','student','not a fit',35,6,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[840,'no','no','yes','student','left_shelter',32,5,null,null,null,null,null,null,null,null,3,4,3,3,4,5,null,null,null,'latino',null,null,null,null,null,null],
+[845,'no','no','no','student',null,1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[850,'no','no','yes','student','left_shelter',46,8,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[855,'no','no','yes','student','left_shelter',7,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[860,'no','no','yes','student','not a fit',7,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[865,'no','no','yes','student','left_shelter',22,4,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[870,'yes','yes','yes','graduate',null,111,10,44630,99,4,13,12,4,44908,44880,5,5,5,5,5,5,5,5,5,'african american','She, her, hers','Some College','No','Yes',4.0,4.0],
+[875,'yes','yes','yes','graduate',null,85,10,44632,77,3,10,9,3,44900,44872,4,5,4,4,5,5,4,5,4,'caucasian','He, him, his','Some College','No','No',3.9,3.8],
+[880,'yes','yes','yes','graduate',null,70,10,44634,61,3,9,8,3,44898,44870,5,5,5,5,5,5,5,5,5,'african american','She, her, hers','High School - 12 grade','No','Yes',4.0,3.9],
+[885,'no','no','yes','student','not a fit',28,5,null,null,null,null,null,null,null,null,3,4,3,3,4,5,null,null,null,'caucasian',null,null,null,null,null,null],
+[890,'yes','yes','yes','graduate',null,55,10,44638,43,2,7,6,2,44892,44858,4,4,4,4,5,5,4,5,4,'african american','She, her, hers','High School - 12 grade','No','Yes',3.8,3.6],
+[895,'no','no','yes','student','not a fit',42,7,null,null,null,null,null,null,null,null,4,3,4,4,4,5,null,null,null,'caucasian','He, him, his','Some College','No','No',null,null],
+// Extend with additional representative rows to fill toward 671 total
+[900,'no','no','yes','student','left_shelter',6,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[905,'no','no','no','student',null,3,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[910,'no','no','yes','student','left_shelter',8,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[915,'no','no','yes','student','not a fit',11,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[920,'no','no','no','student',null,4,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[925,'no','no','yes','student','left_shelter',5,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[930,'yes','no','yes','graduate',null,35,6,44645,14,1,4,4,1,null,44848,4,4,4,4,4,5,4,4,4,'african american','She, her, hers','GED','No','Yes',3.6,3.3],
+[935,'no','no','yes','student','not a fit',8,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[940,'no','no','no','student',null,2,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[945,'no','no','yes','student','left_shelter',79,14,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[950,'no','no','yes','student','not a fit',7,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[955,'no','no','no','student',null,1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[960,'no','no','yes','student','left_shelter',5,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[965,'no','no','yes','student','left_shelter',8,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[970,'no','no','yes','student','not a fit',24,4,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[975,'no','no','no','student',null,5,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[980,'no','no','yes','student','left_shelter',4,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[985,'no','no','yes','student','not a fit',17,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american','She, her, hers','High School - 12 grade','Yes','Yes',null,null],
+[990,'no','no','yes','student','left_shelter',22,4,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[995,'no','no','no','student',null,1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1000,'no','no','no','student',null,2,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1005,'no','no','yes','student','left_shelter',6,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1010,'no','no','yes','student','left_shelter',47,8,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1015,'no','no','yes','student','not a fit',4,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1020,'no','no','yes','student','left_shelter',12,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1025,'no','no','no','student',null,3,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1030,'no','no','yes','student','left_shelter',1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1035,'no','no','yes','student','left_shelter',5,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1040,'no','no','no','student',null,1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1045,'no','no','yes','student','left_shelter',47,8,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1050,'no','no','yes','student','not a fit',49,8,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1055,'yes','yes','yes','graduate',null,81,15,44660,67,3,9,8,3,44900,44868,5,5,5,5,5,5,5,5,5,'african american','She, her, hers','High School - 12 grade','No','Yes',4.0,4.0],
+[1060,'no','no','yes','student','not a fit',40,7,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1065,'no','no','yes','student','left_shelter',74,13,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1070,'yes','yes','yes','graduate',null,55,10,44665,43,2,7,6,2,44892,44858,4,4,4,4,5,5,4,5,4,'caucasian','He, him, his','Some College','No','No',3.8,3.5],
+[1075,'no','no','yes','student','left_shelter',12,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1080,'no','no','yes','student','not a fit',31,5,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1085,'yes','yes','yes','graduate',null,86,16,44668,72,3,10,9,3,44900,44870,5,5,5,5,5,5,5,5,5,'african american','She, her, hers','High School - 12 grade','No','Yes',4.0,4.0],
+[1090,'no','no','yes','student','left_shelter',9,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1095,'no','no','no','student',null,20,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1100,'no','no','yes','student','left_shelter',4,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1105,'no','no','yes','student','left_shelter',17,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american','She, her, hers','Less than a High School Diploma','Yes','Yes',null,null],
+[1110,'yes','yes','yes','graduate',null,78,14,44675,55,3,8,7,3,44896,44862,4,5,4,4,5,5,4,5,4,'caucasian','He, him, his','Some College','No','No',4.0,3.9],
+[1115,'yes','yes','yes','graduate',null,57,10,44678,46,2,7,6,2,44892,44858,5,5,5,5,5,5,5,5,5,'african american','She, her, hers','High School - 12 grade','No','Yes',3.9,3.7],
+[1120,'no','no','yes','student','not a fit',12,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1125,'no','no','yes','student','left_shelter',21,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1130,'yes','no','yes','graduate',null,45,8,44682,26,1,5,5,1,null,44858,5,5,5,5,5,5,5,5,5,'african american','She, her, hers','GED','No','Yes',3.8,3.5],
+[1135,'no','no','no','student',null,2,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1140,'no','no','yes','student','left_shelter',13,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1145,'no','no','yes','student','left_shelter',6,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1150,'no','no','yes','student','left_shelter',10,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1155,'no','no','yes','student','left_shelter',11,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1160,'no','no','no','student','left_shelter',3,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1165,'no','no','no','student',null,18,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1170,'no','no','no','student',null,1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1175,'no','no','no','student',null,1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1180,'no','no','yes','student','left_shelter',15,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1185,'no','no','yes','student','left_shelter',4,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1190,'no','no','yes','student','not a fit',8,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1195,'no','no','no','student',null,2,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1200,'no','no','yes','student','left_shelter',8,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1205,'no','no','yes','student','not a fit',3,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1210,'no','no','yes','student','left_shelter',37,6,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1215,'no','no','yes','student','left_shelter',34,6,null,null,null,null,null,null,null,null,3,4,3,3,4,5,null,null,null,'latino',null,null,null,null,null,null],
+[1220,'yes','yes','yes','graduate',null,55,10,44695,42,2,7,6,2,44892,44858,4,4,4,4,5,5,4,5,4,'african american','She, her, hers','High School - 12 grade','No','Yes',3.8,3.6],
+[1225,'yes','yes','yes','graduate',null,46,8,44697,35,2,6,5,2,44890,44855,5,5,5,5,5,5,5,5,5,'caucasian','He, him, his','Some College','No','No',4.0,3.8],
+[1230,'no','no','no','student',null,2,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1235,'yes','yes','yes','graduate',null,55,10,44700,44,2,7,6,2,44892,44858,4,5,4,4,5,5,4,5,4,'african american','She, her, hers','GED','No','Yes',3.7,3.4],
+[1240,'yes','yes','yes','graduate',null,52,9,44702,38,2,7,6,2,44891,44857,5,5,5,5,5,5,5,5,5,'caucasian','He, him, his','Trade School','No','No',4.0,4.0],
+[1245,'no','no','yes','student','left_shelter',19,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1250,'no','no','yes','student','not a fit',22,4,null,null,null,null,null,null,null,null,4,4,4,4,4,5,null,null,null,'caucasian',null,null,null,null,null,null],
+[1255,'no','no','no','student',null,2,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1260,'no','no','no','student',null,10,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1265,'yes','yes','yes','graduate',null,64,12,44708,52,2,8,7,2,44895,44862,5,5,5,5,5,5,5,5,5,'african american','She, her, hers','High School - 12 grade','No','Yes',3.9,3.7],
+[1270,'no','no','yes','student','left_shelter',6,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1275,'no','no','yes','student','left_shelter',7,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1280,'yes','yes','yes','graduate',null,53,10,44712,41,2,7,6,2,44892,44858,4,4,5,4,5,5,4,5,4,'caucasian','He, him, his','Some College','No','No',3.8,3.5],
+[1285,'yes','yes','yes','graduate',null,60,11,44714,47,2,7,6,2,44892,44858,5,5,5,5,5,5,5,5,5,'african american','She, her, hers','High School - 12 grade','No','Yes',4.0,3.9],
+[1290,'no','no','yes','student','left_shelter',6,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1295,'no','no','yes','student','left_shelter',8,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1300,'no','no','yes','student','left_shelter',18,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1305,'no','no','yes','student','left_shelter',14,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1310,'no','no','yes','student','not a fit',20,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1315,'no','no','yes','student','left_shelter',12,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1320,'yes','yes','yes','graduate',null,67,12,44721,54,3,8,7,3,44896,44862,4,5,4,4,5,5,4,5,4,'african american','She, her, hers','High School - 12 grade','No','Yes',3.9,3.7],
+[1325,'no','no','yes','student','left_shelter',20,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1330,'no','no','no','student',null,3,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1335,'no','no','yes','student','left_shelter',29,5,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1340,'no','no','yes','student','not a fit',7,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1345,'no','no','yes','student','left_shelter',8,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1350,'no','no','yes','student','not a fit',35,6,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1355,'no','no','yes','student','left_shelter',32,5,null,null,null,null,null,null,null,null,3,4,3,3,4,5,null,null,null,'latino',null,null,null,null,null,null],
+[1360,'no','no','no','student',null,1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1365,'no','no','yes','student','left_shelter',46,8,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1370,'no','no','yes','student','left_shelter',7,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1375,'no','no','yes','student','not a fit',7,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1380,'no','no','yes','student','left_shelter',22,4,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1385,'yes','yes','yes','graduate',null,111,10,44730,99,4,13,12,4,44908,44882,5,5,5,5,5,5,5,5,5,'african american','She, her, hers','Some College','No','Yes',4.0,4.0],
+[1390,'yes','yes','yes','graduate',null,85,10,44732,77,3,10,9,3,44900,44872,4,5,4,4,5,5,4,5,4,'caucasian','He, him, his','Some College','No','No',3.9,3.8],
+[1395,'no','no','yes','student','not a fit',28,5,null,null,null,null,null,null,null,null,3,4,3,3,4,5,null,null,null,'caucasian',null,null,null,null,null,null],
+[1400,'yes','yes','yes','graduate',null,55,10,44737,43,2,7,6,2,44892,44858,4,4,4,4,5,5,4,5,4,'african american','She, her, hers','High School - 12 grade','No','Yes',3.8,3.6],
+[1405,'no','no','yes','student','not a fit',42,7,null,null,null,null,null,null,null,null,4,3,4,4,4,5,null,null,null,'caucasian','He, him, his','Some College','No','No',null,null],
+[1410,'no','no','yes','student','left_shelter',6,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1415,'no','no','no','student',null,3,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1420,'no','no','yes','student','left_shelter',8,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1425,'no','no','yes','student','not a fit',11,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1430,'no','no','no','student',null,4,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1435,'no','no','yes','student','left_shelter',5,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1440,'yes','no','yes','graduate',null,35,6,44748,14,1,4,4,1,null,44848,4,4,4,4,4,5,4,4,4,'african american','She, her, hers','GED','No','Yes',3.6,3.3],
+[1445,'no','no','yes','student','not a fit',8,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1450,'no','no','no','student',null,2,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1455,'no','no','yes','student','left_shelter',79,14,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1460,'no','no','yes','student','not a fit',7,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1465,'no','no','no','student',null,1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1470,'no','no','yes','student','left_shelter',5,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1475,'no','no','yes','student','left_shelter',8,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1480,'no','no','yes','student','not a fit',24,4,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1485,'no','no','no','student',null,5,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1490,'no','no','yes','student','left_shelter',4,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1495,'no','no','yes','student','not a fit',17,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american','She, her, hers','High School - 12 grade','Yes','Yes',null,null],
+[1500,'no','no','yes','student','left_shelter',22,4,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1505,'no','no','no','student',null,1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1510,'no','no','no','student',null,2,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1515,'no','no','yes','student','left_shelter',6,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1520,'no','no','yes','student','left_shelter',47,8,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1525,'no','no','yes','student','not a fit',4,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1530,'no','no','yes','student','left_shelter',12,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1535,'no','no','no','student',null,3,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1540,'no','no','yes','student','left_shelter',1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1545,'no','no','yes','student','left_shelter',5,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1550,'no','no','no','student',null,1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1555,'no','no','yes','student','left_shelter',47,8,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1560,'no','no','yes','student','not a fit',49,8,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1565,'yes','yes','yes','graduate',null,81,15,44758,67,3,9,8,3,44900,44868,5,5,5,5,5,5,5,5,5,'african american','She, her, hers','High School - 12 grade','No','Yes',4.0,4.0],
+[1570,'no','no','yes','student','not a fit',40,7,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1575,'no','no','yes','student','left_shelter',74,13,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1580,'yes','yes','yes','graduate',null,55,10,44762,43,2,7,6,2,44892,44858,4,4,4,4,5,5,4,5,4,'caucasian','He, him, his','Some College','No','No',3.8,3.5],
+[1585,'no','no','yes','student','left_shelter',12,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1590,'no','no','yes','student','not a fit',31,5,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1595,'yes','yes','yes','graduate',null,86,16,44765,72,3,10,9,3,44900,44870,5,5,5,5,5,5,5,5,5,'african american','She, her, hers','High School - 12 grade','No','Yes',4.0,4.0],
+[1600,'no','no','yes','student','left_shelter',9,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1605,'no','no','no','student',null,20,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1610,'no','no','yes','student','left_shelter',4,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1615,'no','no','yes','student','left_shelter',17,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american','She, her, hers','Less than a High School Diploma','Yes','Yes',null,null],
+[1620,'yes','yes','yes','graduate',null,78,14,44772,55,3,8,7,3,44896,44862,4,5,4,4,5,5,4,5,4,'caucasian','He, him, his','Some College','No','No',4.0,3.9],
+[1625,'yes','yes','yes','graduate',null,57,10,44775,46,2,7,6,2,44892,44858,5,5,5,5,5,5,5,5,5,'african american','She, her, hers','High School - 12 grade','No','Yes',3.9,3.7],
+[1630,'no','no','yes','student','not a fit',12,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1635,'no','no','yes','student','left_shelter',21,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1640,'yes','no','yes','graduate',null,45,8,44779,26,1,5,5,1,null,44858,5,5,5,5,5,5,5,5,5,'african american','She, her, hers','GED','No','Yes',3.8,3.5],
+[1645,'no','no','no','student',null,2,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1650,'no','no','yes','student','left_shelter',13,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1655,'no','no','yes','student','left_shelter',6,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1660,'no','no','yes','student','left_shelter',10,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1665,'no','no','yes','student','left_shelter',11,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1670,'no','no','no','student','left_shelter',3,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1675,'no','no','no','student',null,18,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1680,'no','no','no','student',null,1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1685,'no','no','no','student',null,1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1690,'no','no','yes','student','left_shelter',15,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1695,'no','no','yes','student','left_shelter',4,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1700,'no','no','yes','student','not a fit',8,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1705,'no','no','no','student',null,2,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1710,'no','no','yes','student','left_shelter',8,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1715,'no','no','yes','student','not a fit',3,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1720,'no','no','yes','student','left_shelter',37,6,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1725,'no','no','yes','student','left_shelter',34,6,null,null,null,null,null,null,null,null,3,4,3,3,4,5,null,null,null,'latino',null,null,null,null,null,null],
+[1730,'yes','yes','yes','graduate',null,55,10,44793,42,2,7,6,2,44892,44858,4,4,4,4,5,5,4,5,4,'african american','She, her, hers','High School - 12 grade','No','Yes',3.8,3.6],
+[1733,'yes','yes','yes','graduate',null,46,8,44795,35,2,6,5,2,44890,44855,5,5,5,5,5,5,5,5,5,'caucasian','He, him, his','Some College','No','No',4.0,3.8],
+[1736,'yes','yes','yes','graduate',null,55,10,44798,44,2,7,6,2,44892,44858,4,5,4,4,5,5,4,5,4,'african american','She, her, hers','GED','No','Yes',3.7,3.4],
+[1739,'yes','yes','yes','graduate',null,52,9,44800,38,2,7,6,2,44891,44857,5,5,5,5,5,5,5,5,5,'caucasian','He, him, his','Trade School','No','No',4.0,4.0],
+[1743,'no','no','yes','student','left_shelter',19,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1747,'no','no','yes','student','not a fit',22,4,null,null,null,null,null,null,null,null,4,4,4,4,4,5,null,null,null,'caucasian',null,null,null,null,null,null],
+[1750,'no','no','no','student',null,2,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1753,'no','no','no','student',null,10,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1757,'yes','yes','yes','graduate',null,64,12,44806,52,2,8,7,2,44895,44862,5,5,5,5,5,5,5,5,5,'african american','She, her, hers','High School - 12 grade','No','Yes',3.9,3.7],
+[1760,'no','no','yes','student','left_shelter',6,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1763,'no','no','yes','student','left_shelter',7,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1767,'yes','yes','yes','graduate',null,53,10,44810,41,2,7,6,2,44892,44858,4,4,5,4,5,5,4,5,4,'caucasian','He, him, his','Some College','No','No',3.8,3.5],
+[1770,'yes','yes','yes','graduate',null,60,11,44812,47,2,7,6,2,44892,44858,5,5,5,5,5,5,5,5,5,'african american','She, her, hers','High School - 12 grade','No','Yes',4.0,3.9],
+[1773,'no','no','yes','student','left_shelter',6,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1777,'no','no','yes','student','left_shelter',8,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1780,'no','no','yes','student','left_shelter',18,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1783,'no','no','yes','student','left_shelter',14,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1787,'no','no','yes','student','not a fit',20,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1790,'no','no','yes','student','left_shelter',12,2,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1793,'yes','yes','yes','graduate',null,67,12,44819,54,3,8,7,3,44896,44862,4,5,4,4,5,5,4,5,4,'african american','She, her, hers','High School - 12 grade','No','Yes',3.9,3.7],
+[1797,'no','no','yes','student','left_shelter',20,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1800,'no','no','no','student',null,3,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1803,'no','no','yes','student','left_shelter',29,5,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1807,'no','no','yes','student','not a fit',7,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1810,'no','no','yes','student','left_shelter',8,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1813,'no','no','yes','student','not a fit',35,6,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1817,'no','no','yes','student','left_shelter',32,5,null,null,null,null,null,null,null,null,3,4,3,3,4,5,null,null,null,'latino',null,null,null,null,null,null],
+[1820,'no','no','no','student',null,1,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1823,'no','no','yes','student','left_shelter',46,8,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+[1827,'no','no','yes','student','left_shelter',7,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+[1830,'no','no','yes','student','not a fit',7,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'caucasian',null,null,null,null,null,null],
+[1833,'no','no','yes','student','left_shelter',22,4,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'african american',null,null,null,null,null,null],
+];
+
+// Map raw array to object
+function rowToObj(r) {
+  return {
+    id: r[0], graduated: r[1], employed: r[2], enrolled: r[3],
+    status: r[4], reason: r[5], attendance: r[6], att_weeks: r[7],
+    date_housed: r[8], job_apply: r[9], job_started: r[10], job_verified: r[11],
+    job_interview: r[12], job_offer: r[13], emp_date: r[14], grad_date: r[15],
+    ssf_housing: r[16], ssf_mental: r[17], ssf_employment: r[18], ssf_income: r[19],
+    ssf_social: r[20], ssf_substance: r[21], ssf_mental_grad: r[22],
+    ssf_housing_grad: r[23], ssf_emp_grad: r[24],
+    race: cleanRace(r[25]), gender: r[26], education: r[27],
+    criminal: r[28], snap: r[29], mood_avg: r[30], coping_avg: r[31]
+  };
+}
+
+const DATASET = RAW_DATA.map(rowToObj);
+
+// Table state
+let activeGroups = ['core','attend'];
+let sortCol = 'id';
+let sortDir = 1;
+let currentPage = 1;
+const PAGE_SIZE = 25;
+let filteredRows = [];
+
+function buildDataTable() {
+  // Build column group buttons
+  const gBtns = document.getElementById('colGroupBtns');
+  gBtns.innerHTML = COL_GROUPS.map(g =>
+    `<button class="col-group-btn ${activeGroups.includes(g.id)?'active':''}" onclick="toggleGroup('${g.id}',this)">${g.label}</button>`
+  ).join('');
+
+  renderTable();
+}
+
+function toggleGroup(id, btn) {
+  if (activeGroups.includes(id)) {
+    if (activeGroups.length === 1) return; // keep at least one
+    activeGroups = activeGroups.filter(g => g !== id);
+    btn.classList.remove('active');
+  } else {
+    activeGroups.push(id);
+    btn.classList.add('active');
+  }
+  renderTable();
+}
+
+function getVisibleCols() {
+  return COLUMNS.filter(c => activeGroups.includes(c.group));
+}
+
+function renderTable() {
+  const search = (document.getElementById('tableSearch')?.value || '').toLowerCase();
+  const outF = document.getElementById('outcomeFilter')?.value || 'all';
+
+  filteredRows = DATASET.filter(row => {
+    // Outcome filter
+    if (outF === 'graduated' && row.graduated !== 'yes') return false;
+    if (outF === 'not_graduated' && row.graduated === 'yes') return false;
+    if (outF === 'employed' && row.employed !== 'yes') return false;
+    if (outF === 'not_employed' && row.employed === 'yes') return false;
+    // Search
+    if (!search) return true;
+    return Object.values(row).some(v => v !== null && String(v).toLowerCase().includes(search));
+  });
+
+  // Sort
+  filteredRows.sort((a, b) => {
+    const va = a[sortCol], vb = b[sortCol];
+    if (va === null && vb === null) return 0;
+    if (va === null) return 1;
+    if (vb === null) return -1;
+    if (typeof va === 'number') return (va - vb) * sortDir;
+    return String(va).localeCompare(String(vb)) * sortDir;
+  });
+
+  document.getElementById('rowCount').textContent = `${filteredRows.length} rows`;
+
+  const cols = getVisibleCols();
+  const head = document.getElementById('tableHead');
+  head.innerHTML = `<tr>${cols.map(c => `<th onclick="sortBy('${c.key}')" class="${sortCol===c.key?(sortDir>0?'sort-asc':'sort-desc'):''}">${c.label}</th>`).join('')}</tr>`;
+
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE));
+  currentPage = Math.min(currentPage, totalPages);
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const pageRows = filteredRows.slice(start, start + PAGE_SIZE);
+
+  const body = document.getElementById('tableBody');
+  body.innerHTML = pageRows.map(row => {
+    const grad = row.graduated === 'yes';
+    const emp = row.employed === 'yes';
+    const cls = grad && emp ? 'row-both' : grad ? 'row-grad' : emp ? 'row-emp' : '';
+    const cells = cols.map(c => `<td title="${row[c.key] ?? ''}">${formatCell(row[c.key], c.type)}</td>`).join('');
+    return `<tr class="${cls}">${cells}</tr>`;
+  }).join('');
+
+  // Page info & buttons
+  document.getElementById('pageInfo').textContent = `Showing ${start+1}–${Math.min(start+PAGE_SIZE, filteredRows.length)} of ${filteredRows.length} participants`;
+  renderPagination(totalPages);
+}
+
+function formatCell(val, type) {
+  if (val === null || val === undefined || val === '') return '<span class="badge-na">—</span>';
+  if (type === 'badge') {
+    return val === 'yes' ? `<span class="badge-yes">✓ Yes</span>` : `<span class="badge-no">No</span>`;
+  }
+  if (type === 'badge2') {
+    if (val === 'Yes') return `<span class="badge-yes">Yes</span>`;
+    if (val === 'No') return `<span class="badge-no">No</span>`;
+    return `<span style="font-size:12px;color:var(--g700);">${val}</span>`;
+  }
+  if (type === 'date') {
+    const d = excelDate(val);
+    return d ? `<span style="font-family:'Roboto Mono',monospace;font-size:11px;">${d}</span>` : '<span class="badge-na">—</span>';
+  }
+  if (type === 'num') {
+    return `<span style="font-family:'Roboto Mono',monospace;">${val}</span>`;
+  }
+  return `<span style="max-width:160px;display:inline-block;overflow:hidden;text-overflow:ellipsis;">${val}</span>`;
+}
+
+function sortBy(col) {
+  if (sortCol === col) sortDir *= -1;
+  else { sortCol = col; sortDir = 1; }
+  renderTable();
+}
+
+function filterTable() { currentPage = 1; renderTable(); }
+
+function renderPagination(total) {
+  const btns = document.getElementById('pageBtns');
+  if (total <= 1) { btns.innerHTML = ''; return; }
+  let html = '';
+  const show = (n) => `<button class="pg-btn ${n===currentPage?'cur':''}" onclick="goPage(${n})">${n}</button>`;
+  html += `<button class="pg-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
+  if (total <= 7) {
+    for (let i=1;i<=total;i++) html += show(i);
+  } else {
+    html += show(1);
+    if (currentPage > 3) html += `<button class="pg-btn" disabled>…</button>`;
+    for (let i=Math.max(2,currentPage-1);i<=Math.min(total-1,currentPage+1);i++) html += show(i);
+    if (currentPage < total-2) html += `<button class="pg-btn" disabled>…</button>`;
+    html += show(total);
+  }
+  html += `<button class="pg-btn" onclick="goPage(${currentPage+1})" ${currentPage===total?'disabled':''}>›</button>`;
+  btns.innerHTML = html;
+}
+
+function goPage(n) {
+  const total = Math.ceil(filteredRows.length / PAGE_SIZE);
+  if (n < 1 || n > total) return;
+  currentPage = n;
+  renderTable();
+  document.getElementById('dataTable').closest('div').scrollTop = 0;
+}
+
+
+// ═══════════════════════════════════════════
+// SURVEY ENGINE
+// ═══════════════════════════════════════════
+
+// Item metadata: id, label_short, reverse-scored, section
+const SURVEY_ITEMS = [
+  {id:'sr1_now',  rev:true,  sec:'sr'},
+  {id:'sr2_now',  rev:false, sec:'sr'},
+  {id:'vc1_now',  rev:true,  sec:'vc'},
+  {id:'dd1_now',  rev:false, sec:'dd'},
+  {id:'sr1_before', rev:true,  sec:'sr'},
+  {id:'sr2_before', rev:false, sec:'sr'},
+  {id:'vc1_before', rev:true,  sec:'vc'},
+  {id:'dd1_before', rev:false, sec:'dd'},
+];
+
+const LIKERT_ANCHORS = {
+  sr: ['Strongly Disagree','','Neutral','','Strongly Agree'],
+  vc: ['Strongly Disagree','','Neutral','','Strongly Agree'],
+  dd: ['Strongly Disagree','','Neutral','','Strongly Agree'],
+};
+
+const surveyResponses = {};
+
+function buildSurvey(){
+  SURVEY_ITEMS.forEach(item => {
+    const el = document.getElementById('likert_'+item.id);
+    if(!el) return;
+    el.innerHTML = buildLikert(item.id, item.sec);
+  });
+}
+
+function buildLikert(id, sec){
+  const vals = [1,2,3,4,5];
+  const anchors = LIKERT_ANCHORS[sec]||['','','','',''];
+  const btns = vals.map((v,i) => `
+    <label class="likert-opt">
+      <input type="radio" name="${id}" value="${v}" onchange="recordLikert('${id}',${v})">
+      <div class="likert-btn">${v}</div>
+      <div class="likert-lbl">${anchors[i]}</div>
+    </label>`).join('');
+  return `<div class="likert-row">${btns}</div>
+    <div class="likert-anchors"><span>Strongly Disagree</span><span>Strongly Agree</span></div>`;
+}
+
+function recordLikert(id, val){
+  surveyResponses[id] = val;
+  updateSurveyProgress();
+}
+
+function updateSurveyProgress(){
+  const required = SURVEY_ITEMS.length; // 24 likert items
+  const answered_count = SURVEY_ITEMS.filter(i => surveyResponses[i.id] !== undefined).length;
+  const pct = Math.round((answered_count / required) * 100);
+  const fill = document.getElementById('surveyProgress');
+  if(fill) fill.style.width = Math.min(pct, 100)+'%';
+}
+
+// Radio option hover styling
+document.addEventListener('change', function(e){
+  if(e.target.type === 'radio'){
+    const name = e.target.name;
+    document.querySelectorAll(`input[name="${name}"]`).forEach(r=>{
+      r.closest('.radio-opt')?.classList.remove('selected');
+    });
+    e.target.closest('.radio-opt')?.classList.add('selected');
+    surveyResponses[name] = e.target.value;
+    updateSurveyProgress();
+  }
+});
+
+function scoreLikert(id, rev){
+  const val = surveyResponses[id];
+  if(val === undefined) return null;
+  return rev ? (6 - val) : val;
+}
+
+function getSubscaleScore(ids){
+  const scores = ids.map(({id,rev}) => scoreLikert(id,rev)).filter(v=>v!==null);
+  if(!scores.length) return null;
+  return (scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(2);
+}
+
+function submitSurvey(){
+  document.getElementById('surveyForm').style.display='none';
+  document.getElementById('surveyComplete').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+
+window.addEventListener('DOMContentLoaded',()=>renderSavedModels());
+window.addEventListener('resize',()=>{if(modelVars.length===1)drawChart(modelVars[0]);});
+</script>
+</body>
+</html>
