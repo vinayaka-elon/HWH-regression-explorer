@@ -525,7 +525,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
           </div>
         </div>
         <div style="background:var(--yellow-l);border:1px solid var(--yellow);border-radius:8px;padding:12px 14px;margin-bottom:20px;font-size:12px;color:#7a4f00;">
-          <strong>Privacy:</strong> Your individual responses will not be visible to the instructor. Only aggregate, de-identified results will be used in any research publication.
+          <strong>Privacy:</strong> Your name is collected only to allow the instructor to match participation for course credit. Individual responses will not be visible to the instructor. Only aggregate, de-identified results will be used in any research publication.
         </div>
         <p style="font-size:12px;color:var(--g700);margin-bottom:20px;">By selecting "I agree," you are consenting to participate. You may stop at any time without penalty. If you do not wish to participate, select "I decline" — you will be returned to the lab with no record of this choice.</p>
         <div style="display:flex;gap:10px;justify-content:center;">
@@ -554,16 +554,15 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
       <div style="font-size:12px;color:var(--g700);margin-top:2px;">Answer based on your thinking after completing the lab today. Scale: 1 = Strongly disagree · 5 = Strongly agree</div>
     </div>
 
-    <!-- Unique ID -->
+    <!-- Student name -->
     <div class="survey-section now-section" style="margin-top:10px;">
       <div class="survey-body">
         <div class="survey-q">
-          <div class="survey-q-label">Create a unique anonymous ID for your response.</div>
-          <div class="survey-q-hint">Use: first 2 letters of your mother's first name + birth month (2 digits) + first 2 letters of the street you grew up on. Example: if her name is Maria, born in April, grew up on Elm St → MA04EL. Write it down — you may need it again.</div>
-          <input type="text" id="uniqueId" maxlength="8" placeholder="e.g. MA04EL"
-            style="width:160px;padding:9px 12px;border:1.5px solid var(--g300);border-radius:7px;font-family:'Roboto Mono',monospace;font-size:14px;color:var(--g900);outline:none;text-transform:uppercase;margin-top:4px;"
-            oninput="this.value=this.value.toUpperCase();updateSurveyProgress()"
-            onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--g300)'">
+          <div class="survey-q-label">Your name</div>
+          <input type="text" id="uniqueId" placeholder="First and last name"
+            style="width:100%;max-width:320px;padding:9px 12px;border:1.5px solid var(--g300);border-radius:7px;font-family:'Roboto',sans-serif;font-size:13px;color:var(--g900);outline:none;margin-top:4px;"
+            onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--g300)'"
+            oninput="updateSurveyProgress()">
         </div>
       </div>
     </div>
