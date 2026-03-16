@@ -2,9 +2,6 @@
 
 > An interactive data analysis lab exploring what predicts success in a culinary workforce training program for individuals experiencing housing instability.
 
-**Live site →** *(deploy to GitHub Pages and paste your URL here)*  
-**Streamlit prediction tool →** [hwhelonscore.streamlit.app](https://hwhelonscore.streamlit.app)
-
 ---
 
 ## About This Project
