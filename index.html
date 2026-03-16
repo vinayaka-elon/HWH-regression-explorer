@@ -554,6 +554,20 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
       <div style="font-size:12px;color:var(--g700);margin-top:2px;">Answer based on your thinking after completing the lab today. Scale: 1 = Strongly disagree · 5 = Strongly agree</div>
     </div>
 
+    <!-- Unique ID -->
+    <div class="survey-section now-section" style="margin-top:10px;">
+      <div class="survey-body">
+        <div class="survey-q">
+          <div class="survey-q-label">Create a unique anonymous ID for your response.</div>
+          <div class="survey-q-hint">Use: first 2 letters of your mother's first name + birth month (2 digits) + first 2 letters of the street you grew up on. Example: if her name is Maria, born in April, grew up on Elm St → MA04EL. Write it down — you may need it again.</div>
+          <input type="text" id="uniqueId" maxlength="8" placeholder="e.g. MA04EL"
+            style="width:160px;padding:9px 12px;border:1.5px solid var(--g300);border-radius:7px;font-family:'Roboto Mono',monospace;font-size:14px;color:var(--g900);outline:none;text-transform:uppercase;margin-top:4px;"
+            oninput="this.value=this.value.toUpperCase();updateSurveyProgress()"
+            onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--g300)'">
+        </div>
+      </div>
+    </div>
+
     <!-- NOW questions — 4 items, one card -->
     <div class="survey-section now-section" style="margin-top:10px;">
       <div class="survey-body">
@@ -798,6 +812,7 @@ const ALL_Q=[
 ];
 
 // ═══ STATE ═══
+const SURVEY_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyQpuFM45ZwvzIVBArAcWtmI_DtdG5hPbI_BtLss80xRhqe_iesOI_ILKb9_2r2e5rdCQ/exec';
 let currentPhase=0,unlocked=[0],modelVars=[],modelOutcome='grad',savedModels=[],answered={},wuAnswered=[false,false],dragSrc=null,tableBuilt=false,surveyBuilt=false;
 
 // ═══ NAV ═══
@@ -1739,9 +1754,57 @@ function getSubscaleScore(ids){
 }
 
 function submitSurvey(){
-  document.getElementById('surveyForm').style.display='none';
-  document.getElementById('surveyComplete').style.display='block';
-  window.scrollTo({top:0,behavior:'smooth'});
+  const btn = document.querySelector('.survey-submit-btn');
+  if(btn){btn.disabled=true;btn.textContent='Submitting…';}
+
+  const getLikert = (name) => {
+    const el = document.querySelector(`input[name="${name}"]:checked`);
+    return el ? Number(el.value) : null;
+  };
+  const getRadio = (name) => {
+    const el = document.querySelector(`input[name="${name}"]:checked`);
+    return el ? el.value : '';
+  };
+  const getVal = (id) => {
+    const el = document.getElementById(id);
+    return el ? (el.value || '') : '';
+  };
+
+  const payload = {
+    uniqueId:    getVal('uniqueId'),
+    sr1_now:     getLikert('sr1_now'),
+    sr2_now:     getLikert('sr2_now'),
+    vc1_now:     getLikert('vc1_now'),
+    dd1_now:     getLikert('dd1_now'),
+    scenA:       getRadio('va1'),
+    scenB:       getRadio('vb1'),
+    scenC:       getVal('vc1v_open'),
+    sr1_before:  getLikert('sr1_before'),
+    sr2_before:  getLikert('sr2_before'),
+    vc1_before:  getLikert('vc1_before'),
+    dd1_before:  getLikert('dd1_before'),
+    attSlider:   getVal('att1_range'),
+    attOpen:     getVal('att3_open'),
+    year:        getVal('d_year'),
+    stats:       getVal('d_stats'),
+    ethics:      getVal('d_ethics'),
+    proficiency: getVal('d_prof'),
+  };
+
+  const show = () => {
+    document.getElementById('surveyForm').style.display='none';
+    document.getElementById('surveyComplete').style.display='block';
+    window.scrollTo({top:0,behavior:'smooth'});
+  };
+
+  fetch(SURVEY_ENDPOINT, {
+    method:  'POST',
+    mode:    'no-cors',
+    headers: {'Content-Type':'application/json'},
+    body:    JSON.stringify(payload)
+  })
+  .then(show)
+  .catch(show); // show completion regardless — no-cors always resolves
 }
 
 
